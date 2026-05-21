@@ -1,0 +1,24 @@
+[
+  {
+    "id": "admin-1",
+    "fullName": "Quản trị viên HT",
+    "email": "admin@fitness.com",
+    "role": "admin",
+    "createdAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "coach-1",
+    "fullName": "HLV Nguyễn Đức Anh",
+    "email": "coach1@fitness.com",
+    "role": "coach",
+    "createdAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "user-1",
+    "fullName": "Trần Thị Mai",
+    "email": "user1@fitness.com",
+    "role": "user",
+    "coachId": "coach-1",
+    "createdAt": "2024-01-01T00:00:00Z"
+  }
+]

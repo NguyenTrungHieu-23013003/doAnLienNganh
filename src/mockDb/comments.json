@@ -1,0 +1,30 @@
+[
+  {
+    "id": "comment-1",
+    "taskId": "task-2",
+    "authorId": "user-1",
+    "content": "Em đã hoàn thành cả 3 hiệp. Hiệp cuối khá vất vả nhưng em đã cố gắng vượt qua. Cơ vai của em hiện đang hơi mỏi nhẹ.",
+    "createdAt": "2026-05-21T18:00:00Z"
+  },
+  {
+    "id": "comment-2",
+    "taskId": "task-2",
+    "authorId": "coach-1",
+    "content": "Rất xuất sắc! Nhức mỏi cơ là dấu hiệu bình thường của phương pháp Progressive Overload (Tăng tiến áp lực). Tối nay e nhớ nghỉ ngơi đủ và uống nhiều nước. A sẽ kiểm tra video tư thế của em nhé.",
+    "createdAt": "2026-05-21T18:30:00Z"
+  },
+  {
+    "id": "comment-3",
+    "taskId": "task-4",
+    "authorId": "user-1",
+    "content": "Em bị nhói đau ở đầu gối trái lúc tập Squat. Em đành phải dừng lại giữa chừng. Em sẽ chuyển bài tập này sang trạng thái BLOCKED (Bị chặn/Chấn thương) nhé.",
+    "createdAt": "2026-05-20T16:00:00Z"
+  },
+  {
+    "id": "comment-4",
+    "taskId": "task-4",
+    "authorId": "coach-1",
+    "content": "Quan trọng — Em TUYỆT ĐỐI KHÔNG tiếp tục các bài tập phần dưới cơ thể cho tới khi qua cơn đau nhé. Anh sẽ điều chỉnh lại kế hoạch bằng các bài tập không dồn lực (low-impact) cho em. Hãy tới chẩn đoán vật lý trị liệu nếu cơn đau cứ kéo dài nhé.",
+    "createdAt": "2026-05-20T16:45:00Z"
+  }
+]

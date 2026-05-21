@@ -1,0 +1,25 @@
+[
+  {
+    "id": "ai-1",
+    "userId": "user-1",
+    "taskId": "task-1",
+    "suggestion": "Dữ liệu nhịp tim của bạn cho thấy tốc độ hồi phục đã cải thiện 4% trong 7 ngày qua. Sự kiên trì với bài tập Cardio Zone 2 của bạn đã bắt đầu phát huy hiệu quả — hãy cân nhắc tăng thời gian chạy lên 35 phút vào tuần sau.",
+    "type": "insight",
+    "createdAt": "2026-05-21T06:00:00Z"
+  },
+  {
+    "id": "ai-2",
+    "userId": "user-1",
+    "taskId": "task-4",
+    "suggestion": "CẢNH BÁO CHẤN THƯƠNG: Dựa trên trạng thái bị chặn (BLOCKED) về cơn đau và lịch sử căng thẳng lên vùng khớp gối, hệ thống đề xuất bạn nên có 2 tuần tập luyện không tạo lực mạnh (low-impact): bơi lội, đạp xe, hoặc chỉ tập trung thân trên. TUYỆT ĐỐI KHÔNG thực hiện các bài squat hay deadlift.",
+    "type": "warning",
+    "createdAt": "2026-05-20T17:00:00Z"
+  },
+  {
+    "id": "ai-3",
+    "userId": "user-1",
+    "suggestion": "Xu hướng cân nặng cho thấy bạn đã giảm được 1.5kg trong 7 ngày qua. Tốc độ này nằm trong phạm vi an toàn (khoảng 0.5–1kg/tuần). Mức độ tuân thủ tiêu thụ protein của bạn vô cùng tuyệt vời. Mục tiêu nhỏ tự động tuần này: duy trì giấc ngủ 7–8 tiếng để tối ưu chuyển hóa năng lượng.",
+    "type": "adjustment",
+    "createdAt": "2026-05-21T06:30:00Z"
+  }
+]
