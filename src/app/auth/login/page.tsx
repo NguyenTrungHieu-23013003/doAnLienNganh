@@ -5,8 +5,10 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { Button } from '@/shared/components/Button';
 import { Card, CardContent, CardHeader } from '@/shared/components/Card';
 import { Activity, Dumbbell, ShieldCheck } from 'lucide-react';
+import { useTranslation } from "react-i18next";
 
 export default function LoginPage() {
+    const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const { login, isLoading } = useAuth();
@@ -31,8 +33,8 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-blue-600 mb-4 shadow-lg shadow-blue-600/20">
             <Activity className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Fitness Tracker</h1>
-          <p className="text-zinc-500 mt-2">Personal Health & Fitness Management</p>
+          <h1 className="text-3xl font-bold text-white tracking-tight">{t("Fitness Tracker")}</h1>
+          <p className="text-zinc-500 mt-2">{t("Personal Health & Fitness Management")}</p>
         </div>
 
         <Card className="glass-morphism border-zinc-800">
@@ -41,8 +43,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-4 py-2">
               <div className="space-y-1">
                 <label htmlFor="email" className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  Email Address
-                </label>
+                  {t("Email Address")}</label>
                 <input
                   id="email"
                   type="email"
@@ -57,30 +58,28 @@ export default function LoginPage() {
               {error && <p className="text-red-500 text-sm animate-pulse">{error}</p>}
 
               <Button type="submit" className="w-full py-6 text-base" isLoading={isLoading}>
-                Sign In
-              </Button>
+                {t("Sign In")}</Button>
             </form>
 
             <div className="mt-8 grid grid-cols-3 gap-3">
               <div className="flex flex-col items-center p-3 rounded-lg bg-zinc-950 border border-zinc-800">
                 <ShieldCheck className="w-5 h-5 text-blue-500 mb-1" />
-                <span className="text-[10px] text-zinc-500 uppercase font-bold">Admin</span>
+                <span className="text-[10px] text-zinc-500 uppercase font-bold">{t("Admin")}</span>
               </div>
               <div className="flex flex-col items-center p-3 rounded-lg bg-zinc-950 border border-zinc-800">
                 <Dumbbell className="w-5 h-5 text-purple-500 mb-1" />
-                <span className="text-[10px] text-zinc-500 uppercase font-bold">Coach</span>
+                <span className="text-[10px] text-zinc-500 uppercase font-bold">{t("Coach")}</span>
               </div>
               <div className="flex flex-col items-center p-3 rounded-lg bg-zinc-950 border border-zinc-800">
                 <Activity className="w-5 h-5 text-green-500 mb-1" />
-                <span className="text-[10px] text-zinc-500 uppercase font-bold">User</span>
+                <span className="text-[10px] text-zinc-500 uppercase font-bold">{t("User")}</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <p className="text-center mt-8 text-zinc-500 text-sm">
-          Tip: Use <code className="text-zinc-300">admin@fitness.com</code> to login as Admin
-        </p>
+          {t("Tip: Use")}<code className="text-zinc-300">{t("admin@fitness.com")}</code> {t("to login as Admin")}</p>
       </div>
     </div>
   );

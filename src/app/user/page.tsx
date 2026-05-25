@@ -9,8 +9,10 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { Dumbbell, Scale, Activity, Calendar, BrainCircuit, CheckCheck, Flame, TrendingDown } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import Link from 'next/link';
+import { useTranslation } from "react-i18next";
 
 export default function UserDashboard() {
+    const { t } = useTranslation();
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [metrics, setMetrics] = useState<HealthMetric[]>([]);
@@ -53,13 +55,13 @@ export default function UserDashboard() {
           <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-600/10">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Overall Progress</p>
+                <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{t("Overall Progress")}</p>
                 <p className="text-3xl font-bold mt-0.5">{completion}%</p>
               </div>
               <div className="flex items-center gap-6 text-center">
-                <div><p className="text-xl font-bold text-green-400">{done}</p><p className="text-[10px] text-zinc-500 uppercase font-bold">Completed</p></div>
-                <div><p className="text-xl font-bold text-amber-400">{tasks.filter((t) => t.status === 'review').length}</p><p className="text-[10px] text-zinc-500 uppercase font-bold">In Review</p></div>
-                <div><p className="text-xl font-bold text-red-400">{tasks.filter((t) => t.status === 'blocked').length}</p><p className="text-[10px] text-zinc-500 uppercase font-bold">Blocked</p></div>
+                <div><p className="text-xl font-bold text-green-400">{done}</p><p className="text-[10px] text-zinc-500 uppercase font-bold">{t("Completed")}</p></div>
+                <div><p className="text-xl font-bold text-amber-400">{tasks.filter((t) => t.status === 'review').length}</p><p className="text-[10px] text-zinc-500 uppercase font-bold">{t("In Review")}</p></div>
+                <div><p className="text-xl font-bold text-red-400">{tasks.filter((t) => t.status === 'blocked').length}</p><p className="text-[10px] text-zinc-500 uppercase font-bold">{t("Blocked")}</p></div>
               </div>
             </div>
             <div className="h-2 bg-zinc-900 rounded-full overflow-hidden">
@@ -70,13 +72,13 @@ export default function UserDashboard() {
           {/* Today's tasks */}
           <Card className="border-zinc-800">
             <CardHeader title="Active Tasks" subtitle="Your ongoing workouts and plans">
-              <Link href="/user/tasks" className="text-xs text-blue-400 hover:text-blue-300 font-semibold">View all →</Link>
+              <Link href="/user/tasks" className="text-xs text-blue-400 hover:text-blue-300 font-semibold">{t("View all →")}</Link>
             </CardHeader>
             <CardContent className="p-0">
               {isLoading ? (
                 <div className="flex justify-center py-12"><div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
               ) : today.length === 0 ? (
-                <div className="text-center py-12 text-zinc-600 text-sm">All tasks complete — great work! 🎉</div>
+                <div className="text-center py-12 text-zinc-600 text-sm">{t("All tasks complete — great work! 🎉")}</div>
               ) : (
                 <div className="divide-y divide-zinc-900">
                   {today.map((task) => (
@@ -87,7 +89,7 @@ export default function UserDashboard() {
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-sm truncate">{task.title}</p>
                         <p className="text-xs text-zinc-500 flex items-center gap-1 mt-0.5">
-                          <Calendar className="w-3 h-3" /> Due {formatDate(task.dueDate)}
+                          <Calendar className="w-3 h-3" /> {t("Due")}{formatDate(task.dueDate)}
                         </p>
                       </div>
                       <StatusBadge status={task.status} />
@@ -113,7 +115,7 @@ export default function UserDashboard() {
                       <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{s.label}</p>
                     </div>
                     <p className="text-2xl font-bold">{s.value}</p>
-                    <p className="text-[10px] text-zinc-600 mt-1">Last recorded</p>
+                    <p className="text-[10px] text-zinc-600 mt-1">{t("Last recorded")}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -128,8 +130,8 @@ export default function UserDashboard() {
             <CardContent className="pt-6 text-center">
               <Flame className="w-10 h-10 text-orange-400 mx-auto mb-2" />
               <p className="text-4xl font-bold">{streak}</p>
-              <p className="text-sm text-zinc-400 font-medium mt-1">Tasks Completed</p>
-              <p className="text-xs text-zinc-600 mt-1">Keep pushing to hit your goal!</p>
+              <p className="text-sm text-zinc-400 font-medium mt-1">{t("Tasks Completed")}</p>
+              <p className="text-xs text-zinc-600 mt-1">{t("Keep pushing to hit your goal!")}</p>
             </CardContent>
           </Card>
 
@@ -142,7 +144,7 @@ export default function UserDashboard() {
               {isLoading ? (
                 <div className="flex justify-center py-6"><div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
               ) : suggestions.length === 0 ? (
-                <p className="text-sm text-zinc-600 italic">Log health metrics to unlock AI insights.</p>
+                <p className="text-sm text-zinc-600 italic">{t("Log health metrics to unlock AI insights.")}</p>
               ) : (
                 suggestions.slice(0, 3).map((s) => (
                   <div key={s.id} className={`p-3 rounded-xl border text-sm leading-relaxed ${suggestionColors[s.type]}`}>
@@ -151,8 +153,7 @@ export default function UserDashboard() {
                 ))
               )}
               <Link href="/user/insights" className="block text-center text-xs text-blue-400 hover:text-blue-300 font-semibold pt-1">
-                View all insights →
-              </Link>
+                {t("View all insights →")}</Link>
             </CardContent>
           </Card>
         </div>

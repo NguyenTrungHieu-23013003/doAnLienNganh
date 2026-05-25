@@ -11,6 +11,7 @@ import { Task, Comment, TaskStatus, User } from '@/shared/types';
 import { useAuth } from '@/features/auth/AuthContext';
 import { Dumbbell, Salad, MessageSquare, Calendar, Ban, PlayCircle, CheckCheck, Send, X } from 'lucide-react';
 import { formatDate, cn } from '@/lib/utils';
+import { useTranslation } from "react-i18next";
 
 const typeIcon: Record<string, React.ReactNode> = {
   workout: <Dumbbell className="w-4 h-4" />,
@@ -24,6 +25,7 @@ const typeColor: Record<string, string> = {
 };
 
 export default function UserTasksPage() {
+    const { t } = useTranslation();
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -89,22 +91,22 @@ export default function UserTasksPage() {
         {/* Task List */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">My Tasks</h2>
+            <h2 className="text-lg font-bold">{t("My Tasks")}</h2>
             <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as TaskStatus | '')}
               className="bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
-              <option value="">All</option>
-              <option value="todo">To Do</option>
-              <option value="in_progress">In Progress</option>
-              <option value="review">Review</option>
-              <option value="done">Done</option>
-              <option value="blocked">Blocked</option>
+              <option value="">{t("All")}</option>
+              <option value="todo">{t("To Do")}</option>
+              <option value="in_progress">{t("In Progress")}</option>
+              <option value="review">{t("Review")}</option>
+              <option value="done">{t("Done")}</option>
+              <option value="blocked">{t("Blocked")}</option>
             </select>
           </div>
 
           {isLoading ? (
             <div className="flex justify-center py-20"><div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
           ) : displayed.length === 0 ? (
-            <div className="text-center py-20 text-zinc-600 text-sm">No tasks found.</div>
+            <div className="text-center py-20 text-zinc-600 text-sm">{t("No tasks found.")}</div>
           ) : (
             <div className="space-y-3">
               {displayed.map((task) => (
@@ -146,7 +148,7 @@ export default function UserTasksPage() {
               <CardContent className="flex-1 flex flex-col gap-6">
                 {/* Description */}
                 <div>
-                  <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Instructions</p>
+                  <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{t("Instructions")}</p>
                   <p className="text-sm text-zinc-300 leading-relaxed">{selectedTask.description || 'No description provided.'}</p>
                 </div>
 
@@ -154,37 +156,33 @@ export default function UserTasksPage() {
                 <div className="flex flex-wrap gap-3">
                   {selectedTask.status === 'todo' && (
                     <Button size="sm" onClick={() => updateStatus(selectedTask.id, 'in_progress')} className="gap-1.5">
-                      <PlayCircle className="w-4 h-4" /> Start Task
-                    </Button>
+                      <PlayCircle className="w-4 h-4" /> {t("Start Task")}</Button>
                   )}
                   {selectedTask.status === 'in_progress' && (
                     <>
                       <Button size="sm" onClick={() => updateStatus(selectedTask.id, 'review')} className="gap-1.5 bg-amber-600 hover:bg-amber-500">
-                        <CheckCheck className="w-4 h-4" /> Submit for Review
-                      </Button>
+                        <CheckCheck className="w-4 h-4" /> {t("Submit for Review")}</Button>
                       <Button size="sm" variant="danger" onClick={() => updateStatus(selectedTask.id, 'blocked')} className="gap-1.5">
-                        <Ban className="w-4 h-4" /> Report Injury / Block
-                      </Button>
+                        <Ban className="w-4 h-4" /> {t("Report Injury / Block")}</Button>
                     </>
                   )}
                   {selectedTask.status === 'blocked' && (
                     <div className="w-full p-3 rounded-xl bg-red-950/20 border border-red-900/30">
-                      <p className="text-sm text-red-300 font-medium">⚠ This task is blocked. Your coach has been notified and will adjust your plan.</p>
+                      <p className="text-sm text-red-300 font-medium">{t("⚠ This task is blocked. Your coach has been notified and will adjust your plan.")}</p>
                     </div>
                   )}
                   {selectedTask.status === 'done' && (
                     <div className="flex items-center gap-2 text-green-400 text-sm font-semibold">
-                      <CheckCheck className="w-5 h-5" /> Coach approved — completed!
-                    </div>
+                      <CheckCheck className="w-5 h-5" /> {t("Coach approved — completed!")}</div>
                   )}
                 </div>
 
                 {/* Comments */}
                 <div className="flex-1 flex flex-col">
-                  <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Discussion with Coach</p>
+                  <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">{t("Discussion with Coach")}</p>
                   <div className="flex-1 space-y-3 max-h-60 overflow-y-auto pr-1 mb-4">
                     {comments.length === 0 ? (
-                      <p className="text-sm text-zinc-600 italic">No messages yet. Start the conversation!</p>
+                      <p className="text-sm text-zinc-600 italic">{t("No messages yet. Start the conversation!")}</p>
                     ) : (
                       comments.map((c) => {
                         const isMe = c.authorId === user?.id;
@@ -216,8 +214,7 @@ export default function UserTasksPage() {
           ) : (
             <div className="flex flex-col items-center justify-center h-64 text-zinc-700 text-sm border-2 border-dashed border-zinc-800 rounded-2xl">
               <Dumbbell className="w-10 h-10 mb-3 opacity-30" />
-              Select a task to view details and chat with your coach.
-            </div>
+              {t("Select a task to view details and chat with your coach.")}</div>
           )}
         </div>
       </div>

@@ -40,5 +40,18 @@ export async function POST(request: Request) {
   };
 
   await addItem('users', newUser);
+
+  // Thông báo tới Coach nếu Admin assign ngay khi tạo tài khoản
+  if (newUser.coachId) {
+    await addItem('notifications', {
+      id: `notif-${crypto.randomUUID()}`,
+      userId: newUser.coachId,
+      title: 'Học viên mới',
+      message: `Admin đã phân công học viên ${newUser.fullName} cho bạn huấn luyện`,
+      isRead: false,
+      createdAt: new Date().toISOString()
+    });
+  }
+
   return NextResponse.json(newUser, { status: 201 });
 }

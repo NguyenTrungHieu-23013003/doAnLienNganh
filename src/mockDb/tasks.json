@@ -5,7 +5,7 @@
     "coachId": "coach-1",
     "title": "Cardio Buổi Sáng — Chạy 30 phút",
     "type": "workout",
-    "status": "in_progress",
+    "status": "review",
     "description": "Chạy bộ với tốc độ vừa phải (Zone 2). Tập trung giữ nhịp thở đều đặn. Ghi lại quãng đường và nhịp tim.",
     "dueDate": "2026-05-22",
     "createdAt": "2026-05-20T08:00:00Z"
@@ -27,7 +27,7 @@
     "coachId": "coach-1",
     "title": "Thực Đơn Giàu Protein (Tuần 1)",
     "type": "nutrition",
-    "status": "todo",
+    "status": "in_progress",
     "description": "Mục tiêu: 150g protein/ngày. Bữa ăn: Sáng sữa chua Hy Lạp, Trưa ức gà nướng, Tối cá hồi. Hạn chế hoàn toàn đường tinh luyện.",
     "dueDate": "2026-05-28",
     "createdAt": "2026-05-20T08:00:00Z"

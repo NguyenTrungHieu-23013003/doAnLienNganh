@@ -6,8 +6,10 @@ import { Card, CardContent, CardHeader } from '@/shared/components/Card';
 import { User, Task, HealthMetric } from '@/shared/types';
 import { Users, Dumbbell, ShieldCheck, TrendingUp, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslation } from "react-i18next";
 
 export default function AdminDashboard() {
+    const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,13 +107,13 @@ export default function AdminDashboard() {
           {/* Coach Performance */}
           <Card className="border-zinc-800">
             <CardHeader title="Coach Performance" subtitle="Task approval and student activity">
-              <Link href="/admin/users" className="text-xs text-blue-400 hover:text-blue-300 font-semibold">Manage →</Link>
+              <Link href="/admin/users" className="text-xs text-blue-400 hover:text-blue-300 font-semibold">{t("Manage →")}</Link>
             </CardHeader>
             <CardContent className="space-y-4">
               {isLoading ? (
                 <div className="flex justify-center py-8"><div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
               ) : users.filter((u) => u.role === 'coach').length === 0 ? (
-                <p className="text-center py-8 text-zinc-600 text-sm">No coaches registered yet.</p>
+                <p className="text-center py-8 text-zinc-600 text-sm">{t("No coaches registered yet.")}</p>
               ) : (
                 users.filter((u) => u.role === 'coach').map((coach) => {
                   const coachTasks = tasks.filter((t) => t.coachId === coach.id);
@@ -126,7 +128,7 @@ export default function AdminDashboard() {
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
                           <p className="font-semibold text-sm">{coach.fullName}</p>
-                          <span className="text-xs text-zinc-500">{coachStudents.length} students · {coachTasks.length} tasks</span>
+                          <span className="text-xs text-zinc-500">{coachStudents.length} {t("students ·")}{coachTasks.length} {t("tasks")}</span>
                         </div>
                         <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                           <div className="h-full bg-purple-500 rounded-full" style={{ width: `${pct}%` }} />
@@ -144,7 +146,7 @@ export default function AdminDashboard() {
         {/* Recent users */}
         <Card className="border-zinc-800">
           <CardHeader title="Recent Accounts" subtitle="Latest registrations on the platform">
-            <Link href="/admin/users" className="text-xs text-blue-400 hover:text-blue-300 font-semibold">View all →</Link>
+            <Link href="/admin/users" className="text-xs text-blue-400 hover:text-blue-300 font-semibold">{t("View all →")}</Link>
           </CardHeader>
           <CardContent className="p-0">
             <div className="divide-y divide-zinc-900">

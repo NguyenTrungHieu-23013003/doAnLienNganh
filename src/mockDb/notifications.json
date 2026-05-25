@@ -1,0 +1,58 @@
+[
+  {
+    "id": "notif-mock",
+    "userId": "user-1",
+    "title": "Chào mừng",
+    "message": "Hệ thống thông báo đã sẵn sàng",
+    "isRead": true,
+    "createdAt": "2026-05-25T12:00:00.000Z"
+  },
+  {
+    "id": "notif-c11f51b0-da65-4477-94f3-6b2ca746e896",
+    "userId": "coach-1",
+    "title": "Học viên mới",
+    "message": "Admin đã phân công học viên Hiếu cho bạn huấn luyện",
+    "isRead": true,
+    "createdAt": "2026-05-25T06:56:50.445Z"
+  },
+  {
+    "id": "notif-4a7a9a68-70d8-459c-b031-9ca6fcbc6e48",
+    "userId": "coach-1",
+    "title": "Học viên mới",
+    "message": "Admin đã phân công học viên Trà cho bạn huấn luyện",
+    "isRead": true,
+    "createdAt": "2026-05-25T06:58:05.488Z"
+  },
+  {
+    "id": "notif-e4a1b7cb-8411-4999-a5f6-56cc65bf82ae",
+    "userId": "coach-1",
+    "title": "Học viên mới",
+    "message": "Admin đã phân công học viên Dương cho bạn huấn luyện",
+    "isRead": true,
+    "createdAt": "2026-05-25T07:02:35.460Z"
+  },
+  {
+    "id": "notif-35fef5e1-e34a-4c0b-933b-83a97eb683b6",
+    "userId": "coach-1",
+    "title": "Học viên mới",
+    "message": "Admin đã phân công học viên Dương cho bạn huấn luyện",
+    "isRead": false,
+    "createdAt": "2026-05-25T07:07:37.242Z"
+  },
+  {
+    "id": "notif-4c5c12c5-3bc8-4870-a741-aefbb63420cf",
+    "userId": "user-1",
+    "title": "Gợi ý AI Mới",
+    "message": "Bạn có một phân tích luyện tập mới từ AI",
+    "isRead": false,
+    "createdAt": "2026-05-25T18:04:09.952Z"
+  },
+  {
+    "id": "notif-d1449fe2-5ce6-4597-9276-136a57c88717",
+    "userId": "user-1",
+    "title": "Gợi ý AI Mới",
+    "message": "Bạn có một phân tích luyện tập mới từ AI",
+    "isRead": false,
+    "createdAt": "2026-05-25T18:05:42.459Z"
+  }
+]

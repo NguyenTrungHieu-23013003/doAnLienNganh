@@ -26,5 +26,19 @@
     "authorId": "coach-1",
     "content": "Quan trọng — Em TUYỆT ĐỐI KHÔNG tiếp tục các bài tập phần dưới cơ thể cho tới khi qua cơn đau nhé. Anh sẽ điều chỉnh lại kế hoạch bằng các bài tập không dồn lực (low-impact) cho em. Hãy tới chẩn đoán vật lý trị liệu nếu cơn đau cứ kéo dài nhé.",
     "createdAt": "2026-05-20T16:45:00Z"
+  },
+  {
+    "id": "comment-9aafbe5d-e151-4971-aeb6-8101e0ec7b6d",
+    "taskId": "task-1",
+    "authorId": "user-1",
+    "content": "hi",
+    "createdAt": "2026-05-24T21:59:10.127Z"
+  },
+  {
+    "id": "comment-68b5a82d-a3c8-445b-a34d-0af3b2977499",
+    "taskId": "task-1",
+    "authorId": "user-1",
+    "content": "hi",
+    "createdAt": "2026-05-25T06:29:01.950Z"
   }
 ]

@@ -21,5 +21,84 @@
     "suggestion": "Xu hướng cân nặng cho thấy bạn đã giảm được 1.5kg trong 7 ngày qua. Tốc độ này nằm trong phạm vi an toàn (khoảng 0.5–1kg/tuần). Mức độ tuân thủ tiêu thụ protein của bạn vô cùng tuyệt vời. Mục tiêu nhỏ tự động tuần này: duy trì giấc ngủ 7–8 tiếng để tối ưu chuyển hóa năng lượng.",
     "type": "adjustment",
     "createdAt": "2026-05-21T06:30:00Z"
+  },
+  {
+    "id": "ai-aae767d1-389a-41b9-a0ba-6eabdb27aa21",
+    "userId": "user-1",
+    "suggestion": "Great progress! Your weight dropped by 0.3kg since last check. Maintain your current nutrition plan for continued results.",
+    "type": "insight",
+    "createdAt": "2026-05-24T21:42:06.567Z"
+  },
+  {
+    "id": "ai-1e45822c-e894-4d3f-9555-4d78b93c2228",
+    "userId": "user-1",
+    "suggestion": "Great progress! Your weight dropped by 0.3kg since last check. Maintain your current nutrition plan for continued results.",
+    "type": "insight",
+    "createdAt": "2026-05-24T21:42:07.839Z"
+  },
+  {
+    "id": "ai-afab779b-0c85-4e2e-ad4e-85dcd7c23559",
+    "userId": "user-1",
+    "suggestion": "Great progress! Your weight dropped by 0.3kg since last check. Maintain your current nutrition plan for continued results.",
+    "type": "insight",
+    "createdAt": "2026-05-24T21:42:08.628Z"
+  },
+  {
+    "id": "ai-4a7600b4-87bb-4ffa-8f18-59332b6aa01e",
+    "userId": "user-1",
+    "suggestion": "Great progress! Your weight dropped by 0.3kg since last check. Maintain your current nutrition plan for continued results.",
+    "type": "insight",
+    "createdAt": "2026-05-24T21:42:12.087Z"
+  },
+  {
+    "id": "ai-b0bae8b6-ed88-44fa-8a59-c93cb9b32d12",
+    "userId": "user-1",
+    "suggestion": "Great progress! Your weight dropped by 0.3kg since last check. Maintain your current nutrition plan for continued results.",
+    "type": "insight",
+    "createdAt": "2026-05-24T21:42:13.433Z"
+  },
+  {
+    "id": "ai-a64a8ad6-7d38-4d9c-9c6a-05f4ad244bb9",
+    "userId": "user-1",
+    "suggestion": "Great progress! Your weight dropped by 0.3kg since last check. Maintain your current nutrition plan for continued results.",
+    "type": "insight",
+    "createdAt": "2026-05-24T21:42:14.374Z"
+  },
+  {
+    "id": "ai-1f066475-2248-4017-b414-2c2393421f6f",
+    "userId": "user-1",
+    "suggestion": "Great progress! Your weight dropped by 0.3kg since last check. Maintain your current nutrition plan for continued results.",
+    "type": "insight",
+    "createdAt": "2026-05-24T21:42:14.759Z"
+  },
+  {
+    "id": "ai-99da458a-bd14-418e-9d55-c513113f0773",
+    "userId": "user-1",
+    "suggestion": "Great progress! Your weight dropped by 0.3kg since last check. Maintain your current nutrition plan for continued results.",
+    "type": "insight",
+    "createdAt": "2026-05-24T21:42:18.321Z"
+  },
+  {
+    "id": "ai-82f0c26c-d0c6-4d8e-a026-e8a6296793b2",
+    "userId": "user-1",
+    "suggestion": "Your metrics are stable. Consider increasing workout intensity by 5–10% this week to break the plateau. Focus on progressive overload.",
+    "type": "adjustment",
+    "createdAt": "2026-05-24T21:44:13.294Z"
+  },
+  {
+    "id": "ai-1fb68e9a-3077-4f62-ba6f-bf2b895ebef2",
+    "userId": "user-1",
+    "taskId": "dummy-task",
+    "suggestion": "Weight has decreased by 0.8 kg over the past week, with a slight decrease in body fat percentage. Heart rate has remained relatively stable, with a slight decrease in the latest reading. Overall, progress is being made towards a healthier weight and body composition.",
+    "type": "insight",
+    "createdAt": "2026-05-25T18:04:09.948Z"
+  },
+  {
+    "id": "ai-21c33caa-428f-447f-aae0-3c7f3a99182c",
+    "userId": "user-1",
+    "taskId": "dummy-task",
+    "suggestion": "Weight has fluctuated between 72.5-73.8kg over the past week, with a slight overall increase. Body fat percentage has remained relatively stable around 19-20%. Heart rate has decreased slightly from 74 to 67 beats per minute.",
+    "type": "insight",
+    "createdAt": "2026-05-25T18:05:42.458Z"
   }
 ]

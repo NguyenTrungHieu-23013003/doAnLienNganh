@@ -7,6 +7,7 @@ import { Button } from '@/shared/components/Button';
 import { User, AISuggestion } from '@/shared/types';
 import { BrainCircuit, RefreshCw, AlertTriangle, Lightbulb, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from "react-i18next";
 
 const typeConfig: Record<AISuggestion['type'], { label: string; color: string; icon: React.ReactNode }> = {
   insight: { label: 'Insight', color: 'border-blue-600/20 bg-blue-950/30 text-blue-300', icon: <BrainCircuit className="w-4 h-4" /> },
@@ -15,6 +16,7 @@ const typeConfig: Record<AISuggestion['type'], { label: string; color: string; i
 };
 
 export default function AdminAIPage() {
+    const { t } = useTranslation();
   const [students, setStudents] = useState<User[]>([]);
   const [allSuggestions, setAllSuggestions] = useState<AISuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,13 +54,12 @@ export default function AdminAIPage() {
       <div className="space-y-8">
         <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-950/40 to-purple-950/30 border border-blue-900/20">
           <h2 className="text-xl font-bold flex items-center gap-2 mb-1">
-            <BrainCircuit className="w-5 h-5 text-blue-400" /> System AI Overview
-          </h2>
-          <p className="text-zinc-400 text-sm">Monitor AI-generated insights across all students. Generate new analysis on demand.</p>
+            <BrainCircuit className="w-5 h-5 text-blue-400" /> {t("System AI Overview")}</h2>
+          <p className="text-zinc-400 text-sm">{t("Monitor AI-generated insights across all students. Generate new analysis on demand.")}</p>
           <div className="flex gap-6 mt-4">
-            <div><p className="text-2xl font-bold text-white">{allSuggestions.length}</p><p className="text-xs text-zinc-500 font-bold uppercase">Total Insights</p></div>
-            <div><p className="text-2xl font-bold text-red-400">{allSuggestions.filter((s) => s.type === 'warning').length}</p><p className="text-xs text-zinc-500 font-bold uppercase">Warnings</p></div>
-            <div><p className="text-2xl font-bold text-amber-400">{allSuggestions.filter((s) => s.type === 'adjustment').length}</p><p className="text-xs text-zinc-500 font-bold uppercase">Adjustments</p></div>
+            <div><p className="text-2xl font-bold text-white">{allSuggestions.length}</p><p className="text-xs text-zinc-500 font-bold uppercase">{t("Total Insights")}</p></div>
+            <div><p className="text-2xl font-bold text-red-400">{allSuggestions.filter((s) => s.type === 'warning').length}</p><p className="text-xs text-zinc-500 font-bold uppercase">{t("Warnings")}</p></div>
+            <div><p className="text-2xl font-bold text-amber-400">{allSuggestions.filter((s) => s.type === 'adjustment').length}</p><p className="text-xs text-zinc-500 font-bold uppercase">{t("Adjustments")}</p></div>
           </div>
         </div>
 
@@ -78,12 +79,12 @@ export default function AdminAIPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold">{student.fullName}</p>
-                      <p className="text-xs text-zinc-500 mb-2">{mySuggestions.length} insights generated</p>
+                      <p className="text-xs text-zinc-500 mb-2">{mySuggestions.length} {t("insights generated")}</p>
                       {latest && (
                         <div className={cn('text-xs p-3 rounded-xl border', typeConfig[latest.type].color)}>
                           <div className="flex items-center gap-1.5 mb-1 font-bold opacity-70">
                             {typeConfig[latest.type].icon}
-                            Latest: {typeConfig[latest.type].label}
+                            {t("Latest:")}{typeConfig[latest.type].label}
                           </div>
                           <p className="leading-relaxed line-clamp-2">{latest.suggestion}</p>
                         </div>
@@ -91,8 +92,7 @@ export default function AdminAIPage() {
                     </div>
                     <Button size="sm" variant="outline" onClick={() => generateForUser(student.id)}
                       isLoading={isGenerating === student.id} className="gap-1.5 shrink-0 text-xs">
-                      <RefreshCw className="w-3.5 h-3.5" /> Refresh
-                    </Button>
+                      <RefreshCw className="w-3.5 h-3.5" /> {t("Refresh")}</Button>
                   </div>
                 );
               })}

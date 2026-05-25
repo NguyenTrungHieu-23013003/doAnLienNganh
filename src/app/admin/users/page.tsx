@@ -9,6 +9,7 @@ import { Input, Select } from '@/shared/components/FormFields';
 import { User, Role } from '@/shared/types';
 import { Plus, Trash2, Pencil, Users, Shield, Dumbbell } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from "react-i18next";
 
 const ROLE_OPTIONS = [
   { value: 'user', label: 'User (Student)' },
@@ -33,6 +34,7 @@ const RoleBadge = ({ role }: { role: Role }) => {
 };
 
 export default function AdminUsersPage() {
+    const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);
   const [coaches, setCoaches] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -134,12 +136,11 @@ export default function AdminUsersPage() {
                 onChange={(e) => setFilterRole(e.target.value)}
                 className="bg-zinc-900 border border-zinc-800 text-sm text-zinc-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500"
               >
-                <option value="">All Roles</option>
+                <option value="">{t("All Roles")}</option>
                 {ROLE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
               <Button onClick={openCreate} className="gap-2">
-                <Plus className="w-4 h-4" /> Add User
-              </Button>
+                <Plus className="w-4 h-4" /> {t("Add User")}</Button>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -151,12 +152,12 @@ export default function AdminUsersPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-zinc-800 text-zinc-500 text-xs font-bold uppercase tracking-wider">
-                    <th className="px-6 py-3 text-left">Name</th>
-                    <th className="px-6 py-3 text-left">Email</th>
-                    <th className="px-6 py-3 text-left">Role</th>
-                    <th className="px-6 py-3 text-left">Assigned Coach</th>
-                    <th className="px-6 py-3 text-left">Joined</th>
-                    <th className="px-6 py-3 text-right">Actions</th>
+                    <th className="px-6 py-3 text-left">{t("Name")}</th>
+                    <th className="px-6 py-3 text-left">{t("Email")}</th>
+                    <th className="px-6 py-3 text-left">{t("Role")}</th>
+                    <th className="px-6 py-3 text-left">{t("Assigned Coach")}</th>
+                    <th className="px-6 py-3 text-left">{t("Joined")}</th>
+                    <th className="px-6 py-3 text-right">{t("Actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -212,7 +213,7 @@ export default function AdminUsersPage() {
           )}
           {formError && <p className="text-sm text-red-400">{formError}</p>}
           <div className="flex gap-3 pt-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button type="button" variant="outline" className="flex-1" onClick={() => setIsModalOpen(false)}>{t("Cancel")}</Button>
             <Button type="submit" className="flex-1" isLoading={isSaving}>{editUser ? 'Save Changes' : 'Create User'}</Button>
           </div>
         </form>

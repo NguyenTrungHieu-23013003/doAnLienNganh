@@ -43,5 +43,16 @@ export async function POST(request: Request) {
   };
 
   await addItem('tasks', newTask);
+  
+  // Thông báo User nhận bài tập mới
+  await addItem('notifications', {
+    id: `notif-${crypto.randomUUID()}`,
+    userId: newTask.userId,
+    title: 'Bài tập mới',
+    message: `Coach vừa giao cho bạn một bài tập mới: ${newTask.title}`,
+    isRead: false,
+    createdAt: new Date().toISOString()
+  });
+
   return NextResponse.json(newTask, { status: 201 });
 }

@@ -8,6 +8,7 @@ import { Input } from '@/shared/components/FormFields';
 import { HealthMetric } from '@/shared/types';
 import { useAuth } from '@/features/auth/AuthContext';
 import { Heart, Activity, Scale, TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { useTranslation } from "react-i18next";
 
 function SparkLine({ values, color }: { values: number[]; color: string }) {
   if (values.length < 2) return null;
@@ -34,6 +35,7 @@ function TrendIcon({ values }: { values: number[] }) {
 }
 
 export default function UserMetricsPage() {
+    const { t } = useTranslation();
   const { user } = useAuth();
   const [metrics, setMetrics] = useState<HealthMetric[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -130,8 +132,7 @@ export default function UserMetricsPage() {
             <CardContent>
               {success && (
                 <div className="mb-4 p-3 rounded-lg bg-green-600/10 border border-green-600/20 text-green-400 text-sm font-medium">
-                  ✓ Metrics logged successfully!
-                </div>
+                  {t("✓ Metrics logged successfully!")}</div>
               )}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <Input id="weight" type="number" step="0.1" label="Weight (kg)" placeholder="e.g. 72.5"
@@ -140,7 +141,7 @@ export default function UserMetricsPage() {
                   value={form.heartRate} onChange={(e) => setForm((f) => ({ ...f, heartRate: e.target.value }))} required />
                 <Input id="bodyFat" type="number" step="0.1" label="Body Fat %" placeholder="e.g. 18.5"
                   value={form.bodyFatPercentage} onChange={(e) => setForm((f) => ({ ...f, bodyFatPercentage: e.target.value }))} />
-                <Button type="submit" className="w-full py-5" isLoading={isSubmitting}>Submit Metrics</Button>
+                <Button type="submit" className="w-full py-5" isLoading={isSubmitting}>{t("Submit Metrics")}</Button>
               </form>
             </CardContent>
           </Card>
@@ -150,15 +151,15 @@ export default function UserMetricsPage() {
             <CardHeader title="Metrics History" subtitle="Last 10 readings" />
             <CardContent className="p-0">
               {metrics.length === 0 ? (
-                <div className="text-center py-16 text-zinc-600 text-sm">No metrics logged yet. Start tracking today!</div>
+                <div className="text-center py-16 text-zinc-600 text-sm">{t("No metrics logged yet. Start tracking today!")}</div>
               ) : (
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-zinc-900 text-zinc-500 text-xs font-bold uppercase tracking-wider">
-                      <th className="px-6 py-3 text-left">Date</th>
-                      <th className="px-6 py-3 text-right">Weight</th>
-                      <th className="px-6 py-3 text-right">Heart Rate</th>
-                      <th className="px-6 py-3 text-right">Body Fat</th>
+                      <th className="px-6 py-3 text-left">{t("Date")}</th>
+                      <th className="px-6 py-3 text-right">{t("Weight")}</th>
+                      <th className="px-6 py-3 text-right">{t("Heart Rate")}</th>
+                      <th className="px-6 py-3 text-right">{t("Body Fat")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -166,12 +167,12 @@ export default function UserMetricsPage() {
                       <tr key={m.id} className={`border-b border-zinc-900 ${idx === 0 ? 'text-white' : 'text-zinc-400'}`}>
                         <td className="px-6 py-3.5">
                           <div className="flex items-center gap-2">
-                            {idx === 0 && <span className="text-[9px] font-bold text-blue-400 bg-blue-600/10 px-1.5 py-0.5 rounded uppercase">Latest</span>}
+                            {idx === 0 && <span className="text-[9px] font-bold text-blue-400 bg-blue-600/10 px-1.5 py-0.5 rounded uppercase">{t("Latest")}</span>}
                             {new Date(m.recordedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                           </div>
                         </td>
-                        <td className="px-6 py-3.5 text-right font-mono">{m.weight} kg</td>
-                        <td className="px-6 py-3.5 text-right font-mono">{m.heartRate} bpm</td>
+                        <td className="px-6 py-3.5 text-right font-mono">{m.weight} {t("kg")}</td>
+                        <td className="px-6 py-3.5 text-right font-mono">{m.heartRate} {t("bpm")}</td>
                         <td className="px-6 py-3.5 text-right font-mono">{m.bodyFatPercentage ? `${m.bodyFatPercentage}%` : '—'}</td>
                       </tr>
                     ))}

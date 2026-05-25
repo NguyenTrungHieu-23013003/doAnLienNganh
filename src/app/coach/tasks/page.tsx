@@ -11,6 +11,7 @@ import { Task, User, TaskType, TaskStatus } from '@/shared/types';
 import { useAuth } from '@/features/auth/AuthContext';
 import { Plus, Dumbbell, Salad, MessageSquare, CheckCircle2, Ban, ChevronRight, Calendar } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { useTranslation } from "react-i18next";
 
 const TYPE_OPTIONS = [
   { value: 'workout', label: 'Workout' },
@@ -31,6 +32,7 @@ const typeColor: Record<TaskType, string> = {
 };
 
 export default function CoachTasksPage() {
+    const { t } = useTranslation();
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [students, setStudents] = useState<User[]>([]);
@@ -93,14 +95,14 @@ export default function CoachTasksPage() {
             {reviewCount > 0 && (
               <button onClick={() => setFilterStatus('review')} className="flex-1 flex items-center gap-3 px-5 py-4 rounded-xl bg-amber-600/5 border border-amber-600/20 hover:bg-amber-600/10 transition-all">
                 <CheckCircle2 className="w-5 h-5 text-amber-400 shrink-0" />
-                <span className="text-amber-300 font-semibold text-sm">{reviewCount} task{reviewCount > 1 ? 's' : ''} await your review</span>
+                <span className="text-amber-300 font-semibold text-sm">{reviewCount} {t("task")}{reviewCount > 1 ? 's' : ''} {t("await your review")}</span>
                 <ChevronRight className="w-4 h-4 text-amber-500 ml-auto" />
               </button>
             )}
             {blockedCount > 0 && (
               <button onClick={() => setFilterStatus('blocked')} className="flex-1 flex items-center gap-3 px-5 py-4 rounded-xl bg-red-600/5 border border-red-600/20 hover:bg-red-600/10 transition-all">
                 <Ban className="w-5 h-5 text-red-400 shrink-0" />
-                <span className="text-red-300 font-semibold text-sm">{blockedCount} injury / blocked report{blockedCount > 1 ? 's' : ''} need attention</span>
+                <span className="text-red-300 font-semibold text-sm">{blockedCount} {t("injury / blocked report")}{blockedCount > 1 ? 's' : ''} {t("need attention")}</span>
                 <ChevronRight className="w-4 h-4 text-red-500 ml-auto" />
               </button>
             )}
@@ -112,14 +114,14 @@ export default function CoachTasksPage() {
             <div className="flex items-center gap-3">
               <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as TaskStatus | '')}
                 className="bg-zinc-900 border border-zinc-800 text-sm text-zinc-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
-                <option value="">All Statuses</option>
-                <option value="todo">To Do</option>
-                <option value="in_progress">In Progress</option>
-                <option value="review">Review</option>
-                <option value="done">Done</option>
-                <option value="blocked">Blocked</option>
+                <option value="">{t("All Statuses")}</option>
+                <option value="todo">{t("To Do")}</option>
+                <option value="in_progress">{t("In Progress")}</option>
+                <option value="review">{t("Review")}</option>
+                <option value="done">{t("Done")}</option>
+                <option value="blocked">{t("Blocked")}</option>
               </select>
-              <Button onClick={() => setIsCreateOpen(true)} className="gap-2"><Plus className="w-4 h-4" /> Assign Task</Button>
+              <Button onClick={() => setIsCreateOpen(true)} className="gap-2"><Plus className="w-4 h-4" /> {t("Assign Task")}</Button>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -128,7 +130,7 @@ export default function CoachTasksPage() {
                 <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
               </div>
             ) : displayed.length === 0 ? (
-              <div className="text-center py-16 text-zinc-600">No tasks found.</div>
+              <div className="text-center py-16 text-zinc-600">{t("No tasks found.")}</div>
             ) : (
               <div className="divide-y divide-zinc-900">
                 {displayed.map((task) => {
@@ -151,7 +153,7 @@ export default function CoachTasksPage() {
                             </div>
                             {student?.fullName ?? 'Unknown'}
                           </span>
-                          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Due {formatDate(task.dueDate)}</span>
+                          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {t("Due")}{formatDate(task.dueDate)}</span>
                         </div>
                       </div>
                       {/* Coach actions */}
@@ -159,17 +161,14 @@ export default function CoachTasksPage() {
                         {task.status === 'review' && (
                           <>
                             <Button size="sm" onClick={() => updateStatus(task.id, 'done')} className="gap-1 bg-green-700 hover:bg-green-600 text-xs">
-                              <CheckCircle2 className="w-3.5 h-3.5" /> Approve
-                            </Button>
+                              <CheckCircle2 className="w-3.5 h-3.5" /> {t("Approve")}</Button>
                             <Button size="sm" variant="outline" onClick={() => updateStatus(task.id, 'in_progress')} className="text-xs">
-                              Return
-                            </Button>
+                              {t("Return")}</Button>
                           </>
                         )}
                         {task.status === 'blocked' && (
                           <Button size="sm" variant="outline" onClick={() => updateStatus(task.id, 'todo')} className="text-xs text-amber-400 border-amber-600/30">
-                            Reassign
-                          </Button>
+                            {t("Reassign")}</Button>
                         )}
                       </div>
                     </div>
@@ -194,8 +193,8 @@ export default function CoachTasksPage() {
           <Input id="dueDate" type="date" label="Due Date" value={form.dueDate}
             onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))} required />
           <div className="flex gap-3 pt-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
-            <Button type="submit" className="flex-1" isLoading={isSaving}>Assign Task</Button>
+            <Button type="button" variant="outline" className="flex-1" onClick={() => setIsCreateOpen(false)}>{t("Cancel")}</Button>
+            <Button type="submit" className="flex-1" isLoading={isSaving}>{t("Assign Task")}</Button>
           </div>
         </form>
       </Modal>

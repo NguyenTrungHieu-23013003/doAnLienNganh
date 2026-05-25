@@ -9,8 +9,10 @@ import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Users, ClipboardList, AlertCircle, CheckCircle2, Calendar, TrendingUp } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import Link from 'next/link';
+import { useTranslation } from "react-i18next";
 
 export default function CoachDashboard() {
+    const { t } = useTranslation();
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [students, setStudents] = useState<User[]>([]);
@@ -61,13 +63,13 @@ export default function CoachDashboard() {
           {/* Tasks needing action */}
           <Card className="border-zinc-800">
             <CardHeader title="Action Required" subtitle="Tasks awaiting your review or intervention">
-              <Link href="/coach/tasks" className="text-xs text-blue-400 hover:text-blue-300 font-semibold">View all →</Link>
+              <Link href="/coach/tasks" className="text-xs text-blue-400 hover:text-blue-300 font-semibold">{t("View all →")}</Link>
             </CardHeader>
             <CardContent className="p-0">
               {isLoading ? (
                 <div className="flex justify-center py-10"><div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
               ) : [...reviewTasks, ...blockedTasks].length === 0 ? (
-                <div className="text-center py-10 text-zinc-600 text-sm">All clear! No actions needed.</div>
+                <div className="text-center py-10 text-zinc-600 text-sm">{t("All clear! No actions needed.")}</div>
               ) : (
                 <div className="divide-y divide-zinc-900">
                   {[...blockedTasks, ...reviewTasks].slice(0, 5).map((task) => {
@@ -91,13 +93,13 @@ export default function CoachDashboard() {
           {/* Student compliance */}
           <Card className="border-zinc-800">
             <CardHeader title="Student Progress" subtitle="Completion rate at a glance">
-              <Link href="/coach/students" className="text-xs text-blue-400 hover:text-blue-300 font-semibold">View all →</Link>
+              <Link href="/coach/students" className="text-xs text-blue-400 hover:text-blue-300 font-semibold">{t("View all →")}</Link>
             </CardHeader>
             <CardContent className="space-y-4">
               {isLoading ? (
                 <div className="flex justify-center py-10"><div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
               ) : students.length === 0 ? (
-                <p className="text-center py-8 text-zinc-600 text-sm">No students assigned.</p>
+                <p className="text-center py-8 text-zinc-600 text-sm">{t("No students assigned.")}</p>
               ) : (
                 students.map((s) => {
                   const myTasks = tasks.filter((t) => t.userId === s.id);
@@ -115,7 +117,7 @@ export default function CoachDashboard() {
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1.5">
                           <p className="text-sm font-semibold">{s.fullName}</p>
-                          <p className="text-xs text-zinc-500 font-bold">{done}/{myTasks.length} tasks</p>
+                          <p className="text-xs text-zinc-500 font-bold">{done}/{myTasks.length} {t("tasks")}</p>
                         </div>
                         <div className="h-1.5 bg-zinc-900 rounded-full overflow-hidden">
                           <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${pct}%` }} />

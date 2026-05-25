@@ -8,6 +8,7 @@ import { AISuggestion, HealthMetric } from '@/shared/types';
 import { useAuth } from '@/features/auth/AuthContext';
 import { BrainCircuit, Lightbulb, AlertTriangle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from "react-i18next";
 
 const typeConfig: Record<AISuggestion['type'], { label: string; color: string; Icon: React.FC<{ className?: string }> }> = {
   insight: { label: 'Insight', color: 'border-blue-600/20 bg-blue-600/5 text-blue-300', Icon: BrainCircuit },
@@ -16,6 +17,7 @@ const typeConfig: Record<AISuggestion['type'], { label: string; color: string; I
 };
 
 export default function UserInsightsPage() {
+    const { t } = useTranslation();
   const { user } = useAuth();
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
   const [metrics, setMetrics] = useState<HealthMetric[]>([]);
@@ -54,13 +56,11 @@ export default function UserInsightsPage() {
         <div className="flex items-center justify-between p-6 rounded-2xl bg-gradient-to-r from-blue-950/50 to-purple-950/30 border border-blue-900/30">
           <div>
             <h2 className="text-xl font-bold flex items-center gap-2">
-              <BrainCircuit className="w-5 h-5 text-blue-400" /> AI-Powered Coaching
-            </h2>
-            <p className="text-zinc-400 text-sm mt-1">Personalized analysis based on your health metrics and workout patterns.</p>
+              <BrainCircuit className="w-5 h-5 text-blue-400" /> {t("AI-Powered Coaching")}</h2>
+            <p className="text-zinc-400 text-sm mt-1">{t("Personalized analysis based on your health metrics and workout patterns.")}</p>
           </div>
           <Button onClick={generateInsight} isLoading={isGenerating} className="gap-2 shrink-0">
-            <RefreshCw className="w-4 h-4" /> Generate New Insight
-          </Button>
+            <RefreshCw className="w-4 h-4" /> {t("Generate New Insight")}</Button>
         </div>
 
         {/* Insight Cards */}
@@ -74,8 +74,8 @@ export default function UserInsightsPage() {
           <Card className="border-zinc-800">
             <CardContent className="py-16 text-center">
               <BrainCircuit className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
-              <p className="text-zinc-500 font-medium">No insights yet.</p>
-              <p className="text-zinc-600 text-sm mt-1">Log health metrics for a few days, then generate your first AI insight.</p>
+              <p className="text-zinc-500 font-medium">{t("No insights yet.")}</p>
+              <p className="text-zinc-600 text-sm mt-1">{t("Log health metrics for a few days, then generate your first AI insight.")}</p>
             </CardContent>
           </Card>
         ) : (
@@ -99,8 +99,7 @@ export default function UserInsightsPage() {
         {/* Metrics needed notice */}
         {metrics.length < 3 && !isLoading && (
           <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-400">
-            💡 Tip: AI insights improve with more data. You have <strong>{metrics.length}</strong> metrics logged. Log daily for richer analysis.
-          </div>
+            {t("💡 Tip: AI insights improve with more data. You have")}<strong>{metrics.length}</strong> {t("metrics logged. Log daily for richer analysis.")}</div>
         )}
       </div>
     </DashboardLayout>

@@ -26,7 +26,7 @@
   {
     "id": "metric-4",
     "userId": "user-1",
-    "weight": 73.0,
+    "weight": 73,
     "heartRate": 69,
     "bodyFatPercentage": 19.6,
     "recordedAt": "2026-05-18T07:00:00Z"
@@ -36,7 +36,7 @@
     "userId": "user-1",
     "weight": 73.5,
     "heartRate": 71,
-    "bodyFatPercentage": 20.0,
+    "bodyFatPercentage": 20,
     "recordedAt": "2026-05-17T07:00:00Z"
   },
   {
@@ -50,9 +50,17 @@
   {
     "id": "metric-7",
     "userId": "user-1",
-    "weight": 74.0,
+    "weight": 74,
     "heartRate": 73,
     "bodyFatPercentage": 20.5,
     "recordedAt": "2026-05-15T07:00:00Z"
+  },
+  {
+    "id": "metric-46180dd7-12d9-4f53-819b-b5133fdd9d2b",
+    "userId": "user-1",
+    "weight": 73,
+    "heartRate": 67,
+    "bodyFatPercentage": 19,
+    "recordedAt": "2026-05-24T21:44:03.580Z"
   }
 ]
