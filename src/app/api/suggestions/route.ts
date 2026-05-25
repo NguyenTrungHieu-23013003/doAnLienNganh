@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { readDb, addItem } from '@/lib/mockDb';
-import { AISuggestion } from '@/shared/types';
+import { AISuggestion, HealthMetric } from '@/shared/types';
 import crypto from 'crypto';
 
 // GET /api/suggestions?userId=xxx
@@ -15,49 +15,88 @@ export async function GET(request: Request) {
   return NextResponse.json(suggestions, { headers: { 'Cache-Control': 'no-store' } });
 }
 
-// POST /api/suggestions — generate a new AI suggestion (mock)
+// POST /api/suggestions — generate a new AI suggestion (Groq Real API)
 export async function POST(request: Request) {
   const body = await request.json();
-  const { userId, taskId, metrics } = body;
+  const { userId, taskId } = body;
 
   if (!userId) {
     return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
   }
 
-  // Mock AI logic based on latest metrics trend
-  let suggestion = '';
-  let type: AISuggestion['type'] = 'insight';
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json({ error: 'GROQ_API_KEY is not configured' }, { status: 500 });
+  }
 
-  if (metrics && metrics.length >= 2) {
-    const latest = metrics[0];
-    const prev = metrics[1];
-    const weightDiff = (latest.weight - prev.weight).toFixed(1);
-    const hrDiff = latest.heartRate - prev.heartRate;
+  // 1. Fetch last 7 metrics entries for the user
+  const allMetrics = await readDb<HealthMetric>('metrics');
+  const userMetrics = allMetrics
+    .filter((m) => m.userId === userId)
+    .sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())
+    .slice(0, 7);
 
-    if (parseFloat(weightDiff) < 0) {
-      suggestion = `Great progress! Your weight dropped by ${Math.abs(parseFloat(weightDiff))}kg since last check. Maintain your current nutrition plan for continued results.`;
-      type = 'insight';
-    } else if (hrDiff > 5) {
-      suggestion = `Your resting heart rate has increased by ${hrDiff} bpm. This may indicate accumulated fatigue. Consider a recovery day with light stretching only.`;
-      type = 'warning';
-    } else {
-      suggestion = `Your metrics are stable. Consider increasing workout intensity by 5–10% this week to break the plateau. Focus on progressive overload.`;
-      type = 'adjustment';
+  if (userMetrics.length === 0) {
+    return NextResponse.json({ error: 'No health metrics found to analyze.' }, { status: 400 });
+  }
+
+  // 2. Build a system prompt
+  const systemPrompt = "You are a fitness and nutrition coach. Analyze the user health data and give specific, concise feedback. Respond in 2-3 short sentences. Do not use introductory greetings.";
+  const userMessage = `User Metrics Data (Latest first):\n${JSON.stringify(userMetrics, null, 2)}`;
+
+  // 3. Send metrics as user message to Groq
+  let suggestionText = '';
+  try {
+    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userMessage }
+        ],
+        temperature: 0.7,
+      })
+    });
+
+    if (!groqRes.ok) {
+      const errorData = await groqRes.text();
+      throw new Error(`Groq API Error: ${groqRes.status} - ${errorData}`);
     }
-  } else {
-    suggestion = 'Log 3+ days of health metrics to unlock personalized AI insights and training recommendations.';
-    type = 'insight';
+
+    const data = await groqRes.json();
+    suggestionText = data.choices?.[0]?.message?.content || "Keep up the great work!";
+  } catch (error: any) {
+    console.error("Groq Integration Error:", error);
+    return NextResponse.json({ error: 'Failed to generate insight from Groq.' }, { status: 500 });
   }
 
   const newSuggestion: AISuggestion = {
     id: `ai-${crypto.randomUUID()}`,
     userId,
     taskId: taskId || undefined,
-    suggestion,
-    type,
+    suggestion: suggestionText,
+    type: 'insight',
     createdAt: new Date().toISOString(),
   };
 
+  // 4. Save Groq response to suggestions.json via mockDb
   await addItem('suggestions', newSuggestion);
+  
+  // Ghi thêm thông báo
+  await addItem('notifications', {
+    id: `notif-${crypto.randomUUID()}`,
+    userId,
+    title: 'Gợi ý AI Mới',
+    message: 'Bạn có một phân tích luyện tập mới từ AI',
+    isRead: false,
+    createdAt: new Date().toISOString()
+  });
+
+  // 5. Return response to client
   return NextResponse.json(newSuggestion, { status: 201 });
 }
