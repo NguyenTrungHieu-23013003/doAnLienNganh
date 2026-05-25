@@ -6,8 +6,10 @@ import { Card, CardContent, CardHeader } from '@/shared/components/Card';
 import { User, Task } from '@/shared/types';
 import { useAuth } from '@/features/auth/AuthContext';
 import { StatusBadge } from '@/shared/components/StatusBadge';
-import { Activity, Dumbbell, Calendar, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Button } from '@/shared/components/Button';
+import { Activity, Dumbbell, Calendar, AlertCircle, CheckCircle2, Send, Bot } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { useTranslation } from "react-i18next";
 
 interface StudentWithStats extends User {
   tasks: Task[];
@@ -16,10 +18,46 @@ interface StudentWithStats extends User {
 }
 
 export default function CoachStudentsPage() {
+    const { t } = useTranslation();
   const { user } = useAuth();
   const [students, setStudents] = useState<StudentWithStats[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selected, setSelected] = useState<StudentWithStats | null>(null);
+  const [chatInput, setChatInput] = useState('');
+  const [chatHistory, setChatHistory] = useState<{role: 'user'|'assistant', content: string}[]>([]);
+  const [chatLoading, setChatLoading] = useState(false);
+
+  useEffect(() => {
+    if (selected) setChatHistory([{ role: 'assistant', content: `Ask me about ${selected.fullName}'s progress` }]);
+  }, [selected?.id]);
+
+  const sendCoachMessage = async () => {
+    if (!chatInput.trim() || chatLoading || !selected || !user) return;
+    const msg = chatInput.trim();
+    setChatInput('');
+    const newHistory = [...chatHistory, { role: 'user' as const, content: msg }];
+    setChatHistory(newHistory);
+    setChatLoading(true);
+    try {
+      const res = await fetch('/api/chat/coach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          coachId: user.id,
+          studentId: selected.id,
+          message: msg,
+          history: chatHistory.map(m => ({ role: m.role, content: m.content }))
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setChatHistory([...newHistory, { role: 'assistant', content: data.reply }]);
+    } catch (e) {
+      setChatHistory([...newHistory, { role: 'assistant', content: "Error connecting to AI assistant." }]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -65,7 +103,7 @@ export default function CoachStudentsPage() {
                 <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
               </div>
             ) : students.length === 0 ? (
-              <p className="text-center text-zinc-600 py-8 text-sm">No students assigned yet.</p>
+              <p className="text-center text-zinc-600 py-8 text-sm">{t("No students assigned yet.")}</p>
             ) : (
               <div className="space-y-2">
                 {students.map((s) => (
@@ -112,13 +150,12 @@ export default function CoachStudentsPage() {
                       <p className="text-zinc-500 text-sm">{selected.email}</p>
                       {selected.blocked && (
                         <span className="inline-flex items-center gap-1.5 mt-1 text-xs font-bold text-red-400 bg-red-600/10 px-2.5 py-1 rounded-full border border-red-600/20">
-                          <AlertCircle className="w-3 h-3" /> Has Blocked Task
-                        </span>
+                          <AlertCircle className="w-3 h-3" /> {t("Has Blocked Task")}</span>
                       )}
                     </div>
                     <div className="ml-auto text-right">
                       <p className="text-3xl font-bold text-blue-400">{selected.completion}%</p>
-                      <p className="text-xs text-zinc-500 font-bold uppercase">Completion</p>
+                      <p className="text-xs text-zinc-500 font-bold uppercase">{t("Completion")}</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-4">
@@ -141,7 +178,7 @@ export default function CoachStudentsPage() {
                 <CardHeader title="Recent Tasks" subtitle="Latest 5 assigned tasks" />
                 <CardContent className="p-0">
                   {selectedLatest.length === 0 ? (
-                    <p className="text-center text-zinc-600 py-8 text-sm">No tasks assigned yet.</p>
+                    <p className="text-center text-zinc-600 py-8 text-sm">{t("No tasks assigned yet.")}</p>
                   ) : (
                     <div className="divide-y divide-zinc-900">
                       {selectedLatest.map((task) => (
@@ -149,7 +186,7 @@ export default function CoachStudentsPage() {
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm truncate">{task.title}</p>
                             <p className="text-xs text-zinc-500 flex items-center gap-1 mt-0.5">
-                              <Calendar className="w-3 h-3" /> Due {formatDate(task.dueDate)}
+                              <Calendar className="w-3 h-3" /> {t("Due")}{formatDate(task.dueDate)}
                             </p>
                           </div>
                           <StatusBadge status={task.status} />
@@ -159,9 +196,45 @@ export default function CoachStudentsPage() {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Inline Chat panel for the selected student */}
+              <Card className="border-zinc-800">
+                <CardHeader title="AI Assistant" subtitle="Data-driven insights for this student" />
+                <CardContent className="space-y-4">
+                  <div className="h-64 overflow-y-auto space-y-4 p-4 rounded-xl bg-zinc-950 border border-zinc-800 flex flex-col">
+                    {chatHistory.map((m, i) => (
+                      <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${m.role === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-zinc-800 text-zinc-200 rounded-bl-none'}`}>
+                          {m.content}
+                        </div>
+                      </div>
+                    ))}
+                    {chatLoading && (
+                      <div className="flex justify-start">
+                        <div className="max-w-[85%] p-3 rounded-2xl text-sm bg-zinc-800 text-zinc-200 rounded-bl-none">
+                          <Bot className="w-5 h-5 animate-pulse" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      value={chatInput} 
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && sendCoachMessage()}
+                      placeholder="Ask a question..."
+                      className="flex-1 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    />
+                    <Button onClick={sendCoachMessage} isLoading={chatLoading} className="px-4">
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </>
           ) : !isLoading && (
-            <div className="flex items-center justify-center h-64 text-zinc-600 text-sm">Select a student to view details.</div>
+            <div className="flex items-center justify-center h-64 text-zinc-600 text-sm">{t("Select a student to view details.")}</div>
           )}
         </div>
       </div>
