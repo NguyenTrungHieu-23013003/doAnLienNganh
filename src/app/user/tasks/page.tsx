@@ -8,7 +8,7 @@ import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Modal } from '@/shared/components/Modal';
 import { Textarea } from '@/shared/components/FormFields';
 import { Task, Comment, TaskStatus, User } from '@/shared/types';
-import { useAuth } from '@/features/auth/AuthContext';
+import { useSession, signOut } from 'next-auth/react';
 import { Dumbbell, Salad, MessageSquare, Calendar, Ban, PlayCircle, CheckCheck, Send, X } from 'lucide-react';
 import { formatDate, cn } from '@/lib/utils';
 import { useTranslation } from "react-i18next";
@@ -26,7 +26,8 @@ const typeColor: Record<string, string> = {
 
 export default function UserTasksPage() {
     const { t } = useTranslation();
-  const { user } = useAuth();
+  const { data: session } = useSession();
+  const user = session?.user as any;
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<TaskStatus | ''>('');

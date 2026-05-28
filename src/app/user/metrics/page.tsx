@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader } from '@/shared/components/Card';
 import { Button } from '@/shared/components/Button';
 import { Input } from '@/shared/components/FormFields';
 import { HealthMetric } from '@/shared/types';
-import { useAuth } from '@/features/auth/AuthContext';
+import { useSession, signOut } from 'next-auth/react';
 import { Heart, Activity, Scale, TrendingDown, TrendingUp, Minus } from 'lucide-react';
 import { useTranslation } from "react-i18next";
 
@@ -36,7 +36,8 @@ function TrendIcon({ values }: { values: number[] }) {
 
 export default function UserMetricsPage() {
     const { t } = useTranslation();
-  const { user } = useAuth();
+  const { data: session } = useSession();
+  const user = session?.user as any;
   const [metrics, setMetrics] = useState<HealthMetric[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [form, setForm] = useState({ weight: '', heartRate: '', bodyFatPercentage: '' });

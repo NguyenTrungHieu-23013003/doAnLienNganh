@@ -2,14 +2,16 @@
 
 import React from 'react';
 import { Sidebar } from '@/shared/components/Sidebar';
-import { useAuth } from '@/features/auth/AuthContext';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import NotificationBell from '@/shared/components/NotificationBell';
 import { useTranslation } from 'react-i18next';
 import ChatBot from '@/shared/components/ChatBot';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth();
+  const { data: session, status } = useSession();
+  const isLoading = status === 'loading';
+  const user = session?.user as any; // Cast user to any for custom role accessing
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -40,7 +42,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <main className="flex-1 ml-[280px] p-8 animate-fade-in">
         <header className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--fg-main)' }}>{t("Welcome,")}{user.fullName}</h1>
+            <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--fg-main)' }}>{t("Welcome,")}{user.fullName || user.name}</h1>
             <p className="text-sm" style={{ color: 'var(--fg-muted)' }}>{t("Here's what's happening with your fitness journey today.")}</p>
           </div>
           <div className="flex gap-4 items-center">
@@ -55,7 +57,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       
       {/* Thêm ChatBot cho User role */}
       {user.role === 'user' && (
-        <ChatBot userId={user.id} userName={user.fullName} />
+        <ChatBot userId={user.id} userName={user.fullName || user.name} />
       )}
     </div>
   );

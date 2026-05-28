@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/shared/components/DashboardLayout';
 import { Card, CardContent, CardHeader } from '@/shared/components/Card';
 import { User, Task } from '@/shared/types';
-import { useAuth } from '@/features/auth/AuthContext';
+import { useSession, signOut } from 'next-auth/react';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Button } from '@/shared/components/Button';
 import { Activity, Dumbbell, Calendar, AlertCircle, CheckCircle2, Send, Bot } from 'lucide-react';
@@ -19,7 +19,8 @@ interface StudentWithStats extends User {
 
 export default function CoachStudentsPage() {
     const { t } = useTranslation();
-  const { user } = useAuth();
+  const { data: session } = useSession();
+  const user = session?.user as any;
   const [students, setStudents] = useState<StudentWithStats[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selected, setSelected] = useState<StudentWithStats | null>(null);

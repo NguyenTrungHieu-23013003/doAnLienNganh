@@ -5,7 +5,7 @@ import DashboardLayout from '@/shared/components/DashboardLayout';
 import { Card, CardContent, CardHeader } from '@/shared/components/Card';
 import { Button } from '@/shared/components/Button';
 import { AISuggestion, HealthMetric } from '@/shared/types';
-import { useAuth } from '@/features/auth/AuthContext';
+import { useSession, signOut } from 'next-auth/react';
 import { BrainCircuit, Lightbulb, AlertTriangle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from "react-i18next";
@@ -18,7 +18,8 @@ const typeConfig: Record<AISuggestion['type'], { label: string; color: string; I
 
 export default function UserInsightsPage() {
     const { t } = useTranslation();
-  const { user } = useAuth();
+  const { data: session } = useSession();
+  const user = session?.user as any;
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
   const [metrics, setMetrics] = useState<HealthMetric[]>([]);
   const [isLoading, setIsLoading] = useState(true);

@@ -5,7 +5,7 @@ import DashboardLayout from '@/shared/components/DashboardLayout';
 import { Card, CardContent, CardHeader } from '@/shared/components/Card';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Task, HealthMetric, AISuggestion } from '@/shared/types';
-import { useAuth } from '@/features/auth/AuthContext';
+import { useSession, signOut } from 'next-auth/react';
 import { Dumbbell, Scale, Activity, Calendar, BrainCircuit, CheckCheck, Flame, TrendingDown } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import Link from 'next/link';
@@ -13,7 +13,8 @@ import { useTranslation } from "react-i18next";
 
 export default function UserDashboard() {
     const { t } = useTranslation();
-  const { user } = useAuth();
+  const { data: session } = useSession();
+  const user = session?.user as any;
   const [tasks, setTasks] = useState<Task[]>([]);
   const [metrics, setMetrics] = useState<HealthMetric[]>([]);
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);

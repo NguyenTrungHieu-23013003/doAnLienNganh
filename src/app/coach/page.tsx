@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/shared/components/DashboardLayout';
 import { Card, CardContent, CardHeader } from '@/shared/components/Card';
 import { Task, User, HealthMetric } from '@/shared/types';
-import { useAuth } from '@/features/auth/AuthContext';
+import { useSession, signOut } from 'next-auth/react';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Users, ClipboardList, AlertCircle, CheckCircle2, Calendar, TrendingUp } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
@@ -13,7 +13,8 @@ import { useTranslation } from "react-i18next";
 
 export default function CoachDashboard() {
     const { t } = useTranslation();
-  const { user } = useAuth();
+  const { data: session } = useSession();
+  const user = session?.user as any;
   const [tasks, setTasks] = useState<Task[]>([]);
   const [students, setStudents] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);

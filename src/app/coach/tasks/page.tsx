@@ -8,7 +8,7 @@ import { Modal } from '@/shared/components/Modal';
 import { Input, Select, Textarea } from '@/shared/components/FormFields';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Task, User, TaskType, TaskStatus } from '@/shared/types';
-import { useAuth } from '@/features/auth/AuthContext';
+import { useSession, signOut } from 'next-auth/react';
 import { Plus, Dumbbell, Salad, MessageSquare, CheckCircle2, Ban, ChevronRight, Calendar } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { useTranslation } from "react-i18next";
@@ -33,7 +33,8 @@ const typeColor: Record<TaskType, string> = {
 
 export default function CoachTasksPage() {
     const { t } = useTranslation();
-  const { user } = useAuth();
+  const { data: session } = useSession();
+  const user = session?.user as any;
   const [tasks, setTasks] = useState<Task[]>([]);
   const [students, setStudents] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);

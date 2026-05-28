@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/features/auth/AuthContext';
+import { useSession, signOut } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Users, Dumbbell, Activity, MessageSquare,
@@ -35,7 +35,9 @@ const menuItemsByRole = {
 };
 
 export const Sidebar = () => {
-  const { user, logout } = useAuth();
+  const { data: session } = useSession();
+  const user = session?.user as any;
+  const logout = () => signOut();
   const pathname = usePathname();
   const { language, theme, setLanguage, setTheme } = useSettings();
   const { t } = useTranslation();
@@ -96,10 +98,10 @@ export const Sidebar = () => {
       <div className="p-4" style={{ borderTop: '1px solid var(--border-color)' }}>
         <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'var(--bg-hover)' }}>
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-xs font-bold text-white shadow">
-            {user.fullName.charAt(0).toUpperCase()}
+            {(user.fullName || user.name || 'U').charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold truncate" style={{ color: 'var(--fg-main)' }}>{user.fullName}</p>
+            <p className="text-sm font-semibold truncate" style={{ color: 'var(--fg-main)' }}>{user.fullName || user.name}</p>
             <p className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--fg-muted)' }}>{user.role}</p>
           </div>
           <button onClick={() => setIsSettingsOpen(true)} title={t('Settings')}
