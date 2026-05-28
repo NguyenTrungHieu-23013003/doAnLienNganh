@@ -1,30 +1,52 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAuth } from '@/features/auth/AuthContext';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/shared/components/Button';
 import { Card, CardContent, CardHeader } from '@/shared/components/Card';
 import { Activity, Dumbbell, ShieldCheck } from 'lucide-react';
 import { useTranslation } from "react-i18next";
+import Link from 'next/link';
 
 export default function LoginPage() {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
+  const router = useRouter();
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, isLoading } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const success = await login(email);
-    if (!success) {
-      setError('Invalid email or user does not exist.');
+    setIsLoading(true);
+
+    try {
+      const res = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (res?.error) {
+        // Kiểm tra nếu lỗi là email chưa xác thực
+        if (res.error.includes('UNVERIFIED_EMAIL') || res.code === 'UNVERIFIED_EMAIL') {
+          router.push(`/auth/verify?email=${encodeURIComponent(email)}`);
+        } else {
+          setError('Sai email hoặc mật khẩu.');
+        }
+      } else {
+        router.push('/'); 
+        router.refresh(); 
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] relative overflow-hidden">
-      {/* Background blobs for premium feel */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px]" />
 
@@ -34,7 +56,6 @@ export default function LoginPage() {
             <Activity className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white tracking-tight">{t("Fitness Tracker")}</h1>
-          <p className="text-zinc-500 mt-2">{t("Personal Health & Fitness Management")}</p>
         </div>
 
         <Card className="glass-morphism border-zinc-800">
@@ -42,15 +63,23 @@ export default function LoginPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4 py-2">
               <div className="space-y-1">
-                <label htmlFor="email" className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  {t("Email Address")}</label>
+                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{t("Email Address")}</label>
                 <input
-                  id="email"
                   type="email"
-                  placeholder="admin@fitness.com"
-                  className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-lg text-white placeholder:text-zinc-600 focus:border-blue-500 transition-colors"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Mật Khẩu</label>
+                <input
+                  type="password"
+                  className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-blue-500 transition-colors"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
@@ -58,28 +87,14 @@ export default function LoginPage() {
               {error && <p className="text-red-500 text-sm animate-pulse">{error}</p>}
 
               <Button type="submit" className="w-full py-6 text-base" isLoading={isLoading}>
-                {t("Sign In")}</Button>
+                {t("Sign In")}
+              </Button>
             </form>
-
-            <div className="mt-8 grid grid-cols-3 gap-3">
-              <div className="flex flex-col items-center p-3 rounded-lg bg-zinc-950 border border-zinc-800">
-                <ShieldCheck className="w-5 h-5 text-blue-500 mb-1" />
-                <span className="text-[10px] text-zinc-500 uppercase font-bold">{t("Admin")}</span>
-              </div>
-              <div className="flex flex-col items-center p-3 rounded-lg bg-zinc-950 border border-zinc-800">
-                <Dumbbell className="w-5 h-5 text-purple-500 mb-1" />
-                <span className="text-[10px] text-zinc-500 uppercase font-bold">{t("Coach")}</span>
-              </div>
-              <div className="flex flex-col items-center p-3 rounded-lg bg-zinc-950 border border-zinc-800">
-                <Activity className="w-5 h-5 text-green-500 mb-1" />
-                <span className="text-[10px] text-zinc-500 uppercase font-bold">{t("User")}</span>
-              </div>
-            </div>
+            <p className="mt-4 text-center text-sm text-zinc-400">
+               Chưa có tài khoản? <Link href="/auth/register" className="text-blue-500 hover:underline">Đăng ký ngay</Link>
+            </p>
           </CardContent>
         </Card>
-
-        <p className="text-center mt-8 text-zinc-500 text-sm">
-          {t("Tip: Use")}<code className="text-zinc-300">{t("admin@fitness.com")}</code> {t("to login as Admin")}</p>
       </div>
     </div>
   );
