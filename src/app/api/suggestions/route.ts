@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { readDb, addItem } from '@/lib/mockDb';
 import { AISuggestion, HealthMetric } from '@/shared/types';
-import crypto from 'crypto';
 
 // GET /api/suggestions?userId=xxx
 export async function GET(request: Request) {
@@ -75,28 +74,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to generate insight from Groq.' }, { status: 500 });
   }
 
-  const newSuggestion: AISuggestion = {
-    id: `ai-${crypto.randomUUID()}`,
+  const newSuggestion = {
     userId,
     taskId: taskId || undefined,
     suggestion: suggestionText,
-    type: 'insight',
-    createdAt: new Date().toISOString(),
+    type: 'insight' as const,
   };
 
-  // 4. Save Groq response to suggestions.json via mockDb
-  await addItem('suggestions', newSuggestion);
+  // 4. Save Groq response via mockDb
+  const created = await addItem('suggestions', newSuggestion);
   
   // Ghi thêm thông báo
   await addItem('notifications', {
-    id: `notif-${crypto.randomUUID()}`,
     userId,
     title: 'Gợi ý AI Mới',
     message: 'Bạn có một phân tích luyện tập mới từ AI',
     isRead: false,
-    createdAt: new Date().toISOString()
   });
 
   // 5. Return response to client
-  return NextResponse.json(newSuggestion, { status: 201 });
+  return NextResponse.json(created ?? newSuggestion, { status: 201 });
 }

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { readDb, addItem } from '@/lib/mockDb';
 import { Comment } from '@/shared/types';
-import crypto from 'crypto';
 
 // GET /api/comments?taskId=xxx
 export async function GET(request: Request) {
@@ -24,14 +23,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
-  const newComment: Comment = {
-    id: `comment-${crypto.randomUUID()}`,
+  const newComment = {
     taskId,
     authorId,
     content,
-    createdAt: new Date().toISOString(),
   };
 
-  await addItem('comments', newComment);
-  return NextResponse.json(newComment, { status: 201 });
+  const created = await addItem('comments', newComment);
+  return NextResponse.json(created ?? newComment, { status: 201 });
 }

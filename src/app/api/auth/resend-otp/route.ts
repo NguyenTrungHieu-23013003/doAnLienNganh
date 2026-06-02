@@ -24,12 +24,11 @@ export async function POST(req: Request) {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = Date.now() + 2 * 60 * 1000; // Hết hạn sau 2 phút
-    const otpToStore = `${otp}_${expiresAt}`;
+    const otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000).toISOString(); // Hết hạn sau 2 phút
 
     const { error: updateError } = await supabase
       .from('users')
-      .update({ verification_otp: otpToStore })
+      .update({ verification_otp: otp, otp_expires_at: otpExpiresAt })
       .eq('email', email);
 
     if (updateError) throw updateError;

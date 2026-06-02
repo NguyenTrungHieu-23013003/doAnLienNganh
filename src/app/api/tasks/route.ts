@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { readDb, addItem } from '@/lib/mockDb';
 import { Task } from '@/shared/types';
-import crypto from 'crypto';
 
 // GET /api/tasks — list tasks, filtered by userId or coachId
 export async function GET(request: Request) {
@@ -30,8 +29,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
-  const newTask: Task = {
-    id: `task-${crypto.randomUUID()}`,
+  const newTask = {
     userId,
     coachId,
     title,
@@ -39,20 +37,17 @@ export async function POST(request: Request) {
     status: 'todo',
     description: description || '',
     dueDate,
-    createdAt: new Date().toISOString(),
   };
 
-  await addItem('tasks', newTask);
+  const createdTask = await addItem('tasks', newTask);
   
   // Thông báo User nhận bài tập mới
   await addItem('notifications', {
-    id: `notif-${crypto.randomUUID()}`,
     userId: newTask.userId,
     title: 'Bài tập mới',
     message: `Coach vừa giao cho bạn một bài tập mới: ${newTask.title}`,
     isRead: false,
-    createdAt: new Date().toISOString()
   });
 
-  return NextResponse.json(newTask, { status: 201 });
+  return NextResponse.json(createdTask ?? newTask, { status: 201 });
 }

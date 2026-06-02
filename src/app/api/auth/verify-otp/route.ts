@@ -11,7 +11,7 @@ export async function POST(req: Request) {
 
     const { data: user } = await supabase
       .from('users')
-      .select('id, verification_otp, is_verified')
+      .select('id, verification_otp, otp_expires_at, is_verified')
       .eq('email', email)
       .maybeSingle();
 
@@ -27,20 +27,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Mã OTP không hợp lệ' }, { status: 400 });
     }
 
-    const [storedCode, storedExpiresAt] = user.verification_otp.split('_');
-
-    if (storedCode !== otp) {
+    // So sánh OTP trực tiếp (không cần split string nữa)
+    if (user.verification_otp !== otp) {
       return NextResponse.json({ error: 'Mã OTP không đúng' }, { status: 400 });
     }
 
-    if (storedExpiresAt && Date.now() > parseInt(storedExpiresAt, 10)) {
+    if (user.otp_expires_at && new Date() > new Date(user.otp_expires_at)) {
       return NextResponse.json({ error: 'Mã OTP đã hết hạn, vui lòng gửi lại mã mới' }, { status: 400 });
     }
 
-    // Kích hoạt tài khoản
+    // Kích hoạt tài khoản, xóa OTP
     const { error } = await supabase
       .from('users')
-      .update({ is_verified: true, verification_otp: null })
+      .update({ is_verified: true, verification_otp: null, otp_expires_at: null })
       .eq('id', user.id);
 
     if (error) throw error;

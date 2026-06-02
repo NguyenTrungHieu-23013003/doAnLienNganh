@@ -22,11 +22,13 @@ export async function getItem<T extends { id: string }>(collection: string, id: 
   return data as T;
 }
 
-export async function addItem<T extends { id: string }>(collection: string, item: T): Promise<void> {
-  const { error } = await supabase.from(collection).insert(item as never);
+export async function addItem<T extends object>(collection: string, item: T): Promise<T | undefined> {
+  const { data, error } = await supabase.from(collection).insert(item as never).select().single();
   if (error) {
     console.error(`Error adding item to ${collection}:`, error);
+    return undefined;
   }
+  return data as T;
 }
 
 export async function updateItem<T extends { id: string }>(

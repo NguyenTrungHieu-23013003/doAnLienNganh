@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import { supabase } from '@/lib/supabase';
-import crypto from 'crypto';
 
 export async function POST(req: Request) {
   try {
@@ -17,30 +16,29 @@ export async function POST(req: Request) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Mã 6 số ngẫu nhiên
-    const expiresAt = Date.now() + 2 * 60 * 1000; // Hết hạn sau 2 phút
-    const otpToStore = `${otp}_${expiresAt}`;
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000).toISOString(); // Hết hạn sau 2 phút
 
     if (existing && !existing.is_verified) {
       // Cập nhật lại thông tin nếu user chưa xác thực nhưng đăng ký lại
       const { error: updateError } = await supabase.from('users').update({
         fullName: name,
         password: hashedPassword,
-        verification_otp: otpToStore
+        verification_otp: otp,
+        otp_expires_at: otpExpiresAt,
       }).eq('email', email);
       
       if (updateError) throw updateError;
     } else {
-      // Tạo user mới
+      // Tạo user mới - để Supabase tự sinh UUID và createdAt
       const { error: insertError } = await supabase.from('users').insert({
-        id: `user-${crypto.randomUUID()}`,
         fullName: name,
         email: email,
         password: hashedPassword,
-        role: 'user', // Mặc định tất cả người đăng ký mới là 'user'
+        role: 'user',
         is_verified: false,
-        verification_otp: otpToStore,
-        createdAt: new Date().toISOString()
+        verification_otp: otp,
+        otp_expires_at: otpExpiresAt,
       });
 
       if (insertError) throw insertError;

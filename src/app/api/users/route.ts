@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { readDb, addItem } from '@/lib/mockDb';
 import { User } from '@/shared/types';
-import crypto from 'crypto';
 
 // GET /api/users — list all users (optionally filtered by role)
 export async function GET(request: Request) {
@@ -30,28 +29,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Email already exists' }, { status: 409 });
   }
 
-  const newUser: User = {
-    id: `user-${crypto.randomUUID()}`,
+  const newUser = {
     fullName,
     email,
     role,
     coachId: coachId || undefined,
-    createdAt: new Date().toISOString(),
   };
 
-  await addItem('users', newUser);
+  const created = await addItem<Omit<User, 'id' | 'createdAt'>>('users', newUser);
+  const resultUser = created ?? { ...newUser, id: '', createdAt: '' };
 
   // Thông báo tới Coach nếu Admin assign ngay khi tạo tài khoản
-  if (newUser.coachId) {
+  if (resultUser.coachId) {
     await addItem('notifications', {
-      id: `notif-${crypto.randomUUID()}`,
-      userId: newUser.coachId,
+      userId: resultUser.coachId,
       title: 'Học viên mới',
-      message: `Admin đã phân công học viên ${newUser.fullName} cho bạn huấn luyện`,
+      message: `Admin đã phân công học viên ${resultUser.fullName} cho bạn huấn luyện`,
       isRead: false,
-      createdAt: new Date().toISOString()
     });
   }
 
-  return NextResponse.json(newUser, { status: 201 });
+  return NextResponse.json(resultUser, { status: 201 });
 }

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { readDb, addItem } from '@/lib/mockDb';
 import { HealthMetric } from '@/shared/types';
-import crypto from 'crypto';
 
 // GET /api/metrics?userId=xxx
 export async function GET(request: Request) {
@@ -24,15 +23,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
-  const newMetric: HealthMetric = {
-    id: `metric-${crypto.randomUUID()}`,
+  const newMetric = {
     userId,
     weight: parseFloat(weight),
     heartRate: parseInt(heartRate),
     bodyFatPercentage: parseFloat(bodyFatPercentage) || 0,
-    recordedAt: new Date().toISOString(),
   };
 
-  await addItem('metrics', newMetric);
-  return NextResponse.json(newMetric, { status: 201 });
+  const created = await addItem('metrics', newMetric);
+  return NextResponse.json(created ?? newMetric, { status: 201 });
 }
