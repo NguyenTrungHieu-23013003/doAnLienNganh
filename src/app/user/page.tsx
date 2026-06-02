@@ -75,7 +75,7 @@ export default function UserDashboard() {
 
           {/* Today's tasks */}
           <Card className="border-zinc-800">
-            <CardHeader title="Active Tasks" subtitle="Your ongoing workouts and plans">
+            <CardHeader title={t("Active Tasks")} subtitle={t("Your ongoing workouts and plans")}>
               <Link href="/user/tasks" className="text-xs text-blue-400 hover:text-blue-300 font-semibold">{t("View all →")}</Link>
             </CardHeader>
             <CardContent className="p-0">
@@ -108,9 +108,9 @@ export default function UserDashboard() {
           {latest && (
             <div className="grid grid-cols-3 gap-4">
               {[
-                { label: 'Weight', value: `${latest.weight} kg`, icon: Scale, color: 'text-blue-400' },
-                { label: 'Heart Rate', value: `${latest.heartRate} bpm`, icon: Activity, color: 'text-red-400' },
-                { label: 'Body Fat', value: `${latest.bodyFatPercentage}%`, icon: TrendingDown, color: 'text-amber-400' },
+                { label: t('Weight'), value: `${latest.weight} kg`, icon: Scale, color: 'text-blue-400' },
+                { label: t('Heart Rate'), value: `${latest.heartRate} bpm`, icon: Activity, color: 'text-red-400' },
+                { label: t('Body Fat'), value: `${latest.bodyFatPercentage}%`, icon: TrendingDown, color: 'text-amber-400' },
               ].map((s) => (
                 <Card key={s.label} className="border-zinc-800 bg-zinc-950/50">
                   <CardContent className="pt-5 pb-5">
@@ -141,7 +141,7 @@ export default function UserDashboard() {
 
           {/* AI Suggestions */}
           <Card className="border-zinc-800">
-            <CardHeader title="AI Insights" subtitle="Personalized coaching">
+            <CardHeader title={t("AI Insights")} subtitle={t("Personalized coaching")}>
               <BrainCircuit className="w-4 h-4 text-blue-400" />
             </CardHeader>
             <CardContent className="space-y-3">

@@ -38,10 +38,10 @@ export default function CoachDashboard() {
   const blockedTasks = tasks.filter((t) => t.status === 'blocked');
 
   const stats = [
-    { label: 'Students', value: students.length, icon: Users, color: 'text-blue-400' },
-    { label: 'Pending Review', value: reviewTasks.length, icon: ClipboardList, color: 'text-amber-400' },
-    { label: 'Injuries', value: blockedTasks.length, icon: AlertCircle, color: 'text-red-400' },
-    { label: 'Completed', value: tasks.filter((t) => t.status === 'done').length, icon: CheckCircle2, color: 'text-green-400' },
+    { label: t('Students'), value: students.length, icon: Users, color: 'text-blue-400' },
+    { label: t('Pending Review'), value: reviewTasks.length, icon: ClipboardList, color: 'text-amber-400' },
+    { label: t('Injuries'), value: blockedTasks.length, icon: AlertCircle, color: 'text-red-400' },
+    { label: t('Completed'), value: tasks.filter((t) => t.status === 'done').length, icon: CheckCircle2, color: 'text-green-400' },
   ];
 
   return (
@@ -65,7 +65,7 @@ export default function CoachDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Tasks needing action */}
           <Card className="border-zinc-800">
-            <CardHeader title="Action Required" subtitle="Tasks awaiting your review or intervention">
+            <CardHeader title={t("Action Required")} subtitle={t("Tasks awaiting your review or intervention")}>
               <Link href="/coach/tasks" className="text-xs text-blue-400 hover:text-blue-300 font-semibold">{t("View all →")}</Link>
             </CardHeader>
             <CardContent className="p-0">
@@ -95,7 +95,7 @@ export default function CoachDashboard() {
 
           {/* Student compliance */}
           <Card className="border-zinc-800">
-            <CardHeader title="Student Progress" subtitle="Completion rate at a glance">
+            <CardHeader title={t("Student Progress")} subtitle={t("Completion rate at a glance")}>
               <Link href="/coach/students" className="text-xs text-blue-400 hover:text-blue-300 font-semibold">{t("View all →")}</Link>
             </CardHeader>
             <CardContent className="space-y-4">

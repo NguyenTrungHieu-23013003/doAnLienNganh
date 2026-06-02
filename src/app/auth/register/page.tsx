@@ -55,7 +55,9 @@ export default function RegisterPage() {
               <input type="email" placeholder="Email" required className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 text-white rounded-lg focus:outline-none focus:border-blue-500" onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
               <input type="password" placeholder="Mật khẩu" required className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 text-white rounded-lg focus:outline-none focus:border-blue-500" onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
 
-              {error && <p className="text-red-500 text-sm">{error}</p>}
+              <div className="min-h-5">
+                {error && <p className="text-red-500 text-sm animate-pulse">{error}</p>}
+              </div>
               <Button type="submit" className="w-full py-4 text-base" isLoading={isLoading}>Đăng Ký</Button>
             </form>
             <p className="mt-4 text-center text-sm text-zinc-400">Đã có tài khoản? <Link href="/auth/login" className="text-blue-500 hover:underline">Đăng nhập</Link></p>

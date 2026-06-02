@@ -84,7 +84,9 @@ export default function LoginPage() {
                 />
               </div>
 
-              {error && <p className="text-red-500 text-sm animate-pulse">{error}</p>}
+              <div className="min-h-5">
+                {error && <p className="text-red-500 text-sm animate-pulse">{error}</p>}
+              </div>
 
               <Button type="submit" className="w-full py-6 text-base" isLoading={isLoading}>
                 {t("Sign In")}

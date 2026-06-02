@@ -36,18 +36,18 @@ export default function AdminDashboard() {
   const completionRate = tasks.length > 0 ? Math.round((numDone / tasks.length) * 100) : 0;
 
   const stats = [
-    { label: 'Total Users', value: users.length, icon: Users, color: 'text-blue-400', href: '/admin/users' },
-    { label: 'Active Coaches', value: numCoaches, icon: ShieldCheck, color: 'text-purple-400', href: '/admin/users' },
-    { label: 'Students', value: numStudents, icon: Dumbbell, color: 'text-green-400', href: '/admin/users' },
-    { label: 'Task Completion', value: `${completionRate}%`, icon: TrendingUp, color: 'text-amber-400', href: '#' },
+    { label: t('Total Users'), value: users.length, icon: Users, color: 'text-blue-400', href: '/admin/users' },
+    { label: t('Active Coaches'), value: numCoaches, icon: ShieldCheck, color: 'text-purple-400', href: '/admin/users' },
+    { label: t('Students'), value: numStudents, icon: Dumbbell, color: 'text-green-400', href: '/admin/users' },
+    { label: t('Task Completion'), value: `${completionRate}%`, icon: TrendingUp, color: 'text-amber-400', href: '#' },
   ];
 
   const taskStatus = [
-    { label: 'To Do', value: tasks.filter((t) => t.status === 'todo').length, color: 'bg-zinc-600' },
-    { label: 'In Progress', value: tasks.filter((t) => t.status === 'in_progress').length, color: 'bg-blue-600' },
-    { label: 'Review', value: tasks.filter((t) => t.status === 'review').length, color: 'bg-amber-500' },
-    { label: 'Done', value: tasks.filter((t) => t.status === 'done').length, color: 'bg-green-600' },
-    { label: 'Blocked', value: numBlocked, color: 'bg-red-600' },
+    { label: t('To Do'), value: tasks.filter((t) => t.status === 'todo').length, color: 'bg-zinc-600' },
+    { label: t('In Progress'), value: tasks.filter((t) => t.status === 'in_progress').length, color: 'bg-blue-600' },
+    { label: t('Review'), value: tasks.filter((t) => t.status === 'review').length, color: 'bg-amber-500' },
+    { label: t('Done'), value: tasks.filter((t) => t.status === 'done').length, color: 'bg-green-600' },
+    { label: t('Blocked'), value: numBlocked, color: 'bg-red-600' },
   ];
 
   return (
@@ -73,7 +73,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Task Distribution */}
           <Card className="border-zinc-800">
-            <CardHeader title="System Task Overview" subtitle="Distribution across all statuses" />
+            <CardHeader title={t("System Task Overview")} subtitle={t("Distribution across all statuses")} />
             <CardContent className="space-y-4">
               {isLoading ? (
                 <div className="flex justify-center py-8"><div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
 
           {/* Coach Performance */}
           <Card className="border-zinc-800">
-            <CardHeader title="Coach Performance" subtitle="Task approval and student activity">
+            <CardHeader title={t("Coach Performance")} subtitle={t("Task approval and student activity")}>
               <Link href="/admin/users" className="text-xs text-blue-400 hover:text-blue-300 font-semibold">{t("Manage →")}</Link>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -148,7 +148,7 @@ export default function AdminDashboard() {
 
         {/* Recent users */}
         <Card className="border-zinc-800">
-          <CardHeader title="Recent Accounts" subtitle="Latest registrations on the platform">
+          <CardHeader title={t("Recent Accounts")} subtitle={t("Latest registrations on the platform")}>
             <Link href="/admin/users" className="text-xs text-blue-400 hover:text-blue-300 font-semibold">{t("View all →")}</Link>
           </CardHeader>
           <CardContent className="p-0">
@@ -162,11 +162,10 @@ export default function AdminDashboard() {
                     <p className="font-semibold text-sm">{u.fullName}</p>
                     <p className="text-xs text-zinc-500">{u.email}</p>
                   </div>
-                  <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border ${
-                    u.role === 'admin' ? 'bg-purple-600/10 text-purple-400 border-purple-600/20' :
-                    u.role === 'coach' ? 'bg-blue-600/10 text-blue-400 border-blue-600/20' :
-                    'bg-green-600/10 text-green-400 border-green-600/20'
-                  }`}>{u.role}</span>
+                  <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border ${u.role === 'admin' ? 'bg-purple-600/10 text-purple-400 border-purple-600/20' :
+                      u.role === 'coach' ? 'bg-blue-600/10 text-blue-400 border-blue-600/20' :
+                        'bg-green-600/10 text-green-400 border-green-600/20'
+                    }`}>{u.role}</span>
                 </div>
               ))}
             </div>

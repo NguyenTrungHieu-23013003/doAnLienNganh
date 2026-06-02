@@ -115,5 +115,19 @@
   "Coach approved — completed!": "Coach approved — completed!",
   "Discussion with Coach": "Discussion with Coach",
   "No messages yet. Start the conversation!": "No messages yet. Start the conversation!",
-  "Select a task to view details and chat with your coach.": "Select a task to view details and chat with your coach."
+  "Select a task to view details and chat with your coach.": "Select a task to view details and chat with your coach.",
+  "Students": "Students",
+  "Pending Review": "Pending Review",
+  "Injuries": "Injuries",
+  "Action Required": "Action Required",
+  "Tasks awaiting your review or intervention": "Tasks awaiting your review or intervention",
+  "Student Progress": "Student Progress",
+  "Completion rate at a glance": "Completion rate at a glance",
+  "Completion rate": "Completion rate",
+  "Assign New Task": "Assign New Task",
+  "Title": "Title",
+  "Description": "Description",
+  "Due Date": "Due Date",
+  "Assign": "Assign",
+  "Select Student": "Select Student"
 }

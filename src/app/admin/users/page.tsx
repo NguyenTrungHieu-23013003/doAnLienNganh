@@ -34,7 +34,7 @@ const RoleBadge = ({ role }: { role: Role }) => {
 };
 
 export default function AdminUsersPage() {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);
   const [coaches, setCoaches] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -116,10 +116,10 @@ export default function AdminUsersPage() {
         {/* Stats Row */}
         <div className="grid grid-cols-4 gap-4">
           {[
-            { label: 'Total Users', value: stats.total, color: 'text-white' },
-            { label: 'Admins', value: stats.admins, color: 'text-purple-400' },
-            { label: 'Coaches', value: stats.coaches, color: 'text-blue-400' },
-            { label: 'Students', value: stats.students, color: 'text-green-400' },
+            { label: t('Total Users'), value: stats.total, color: 'text-white' },
+            { label: t('Admins'), value: stats.admins, color: 'text-purple-400' },
+            { label: t('Coaches'), value: stats.coaches, color: 'text-blue-400' },
+            { label: t('Students'), value: stats.students, color: 'text-green-400' },
           ].map((s) => (
             <Card key={s.label} className="border-zinc-800 bg-zinc-950/50">
               <CardContent className="pt-5 pb-5">

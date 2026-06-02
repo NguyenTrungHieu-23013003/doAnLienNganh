@@ -30,8 +30,21 @@ export default function CoachStudentsPage() {
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (selected) setChatHistory([{ role: 'assistant', content: `Ask me about ${selected.fullName}'s progress` }]);
+    if (selected) {
+      const saved = sessionStorage.getItem(`coach_ai_chat_${selected.id}`);
+      if (saved) {
+        setChatHistory(JSON.parse(saved));
+      } else {
+        setChatHistory([{ role: 'assistant', content: `Ask me about ${selected.fullName}'s progress` }]);
+      }
+    }
   }, [selected]);
+
+  useEffect(() => {
+    if (selected && chatHistory.length > 0) {
+      sessionStorage.setItem(`coach_ai_chat_${selected.id}`, JSON.stringify(chatHistory));
+    }
+  }, [chatHistory, selected]);
 
   const sendCoachMessage = async () => {
     if (!chatInput.trim() || chatLoading || !selected || !user) return;

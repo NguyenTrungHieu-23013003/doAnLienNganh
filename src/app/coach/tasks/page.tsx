@@ -86,7 +86,7 @@ export default function CoachTasksPage() {
   const blockedCount = tasks.filter((t) => t.status === 'blocked').length;
 
   const studentOptions = [
-    { value: '', label: 'Select student...' },
+    { value: '', label: t('Select student...') },
     ...students.map((s) => ({ value: s.id, label: s.fullName })),
   ];
 
@@ -114,7 +114,7 @@ export default function CoachTasksPage() {
         )}
 
         <Card className="border-zinc-800">
-          <CardHeader title="Task Management" subtitle="All tasks assigned to your students">
+          <CardHeader title={t("Task Management")} subtitle={t("All tasks assigned to your students")}>
             <div className="flex items-center gap-3">
               <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as TaskStatus | '')}
                 className="bg-zinc-900 border border-zinc-800 text-sm text-zinc-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
@@ -184,17 +184,17 @@ export default function CoachTasksPage() {
         </Card>
       </div>
 
-      <Modal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title="Assign New Task">
+      <Modal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title={t("Assign New Task")}>
         <form onSubmit={handleCreate} className="space-y-4">
-          <Select id="userId" label="Student" value={form.userId} options={studentOptions}
+          <Select id="userId" label={t("Student")} value={form.userId} options={studentOptions}
             onChange={(e) => setForm((f) => ({ ...f, userId: e.target.value }))} required />
-          <Input id="title" label="Task Title" placeholder="e.g. Upper Body Strength Training" value={form.title}
+          <Input id="title" label={t("Task Title")} placeholder={t("e.g. Upper Body Strength Training")} value={form.title}
             onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} required />
-          <Select id="type" label="Type" value={form.type} options={TYPE_OPTIONS}
+          <Select id="type" label={t("Type")} value={form.type} options={TYPE_OPTIONS.map(o => ({...o, label: t(o.label)}))}
             onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as TaskType }))} />
-          <Textarea id="description" label="Description / Instructions" placeholder="Describe the workout or nutrition plan in detail..." value={form.description}
+          <Textarea id="description" label={t("Description / Instructions")} placeholder={t("Describe the workout or nutrition plan in detail...")} value={form.description}
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
-          <Input id="dueDate" type="date" label="Due Date" value={form.dueDate}
+          <Input id="dueDate" type="date" label={t("Due Date")} value={form.dueDate}
             onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))} required />
           <div className="flex gap-3 pt-2">
             <Button type="button" variant="outline" className="flex-1" onClick={() => setIsCreateOpen(false)}>{t("Cancel")}</Button>
