@@ -192,7 +192,7 @@ export default function UserTasksPage() {
                         return (
                           <div key={c.id} className={cn('flex gap-2.5', isMe ? 'flex-row-reverse' : 'flex-row')}>
                             <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-bold shrink-0">
-                              {isMe ? user?.fullName.charAt(0) : coachInfo?.fullName.charAt(0) ?? 'C'}
+                              {isMe ? (user?.fullName?.charAt(0) ?? 'U') : (coachInfo?.fullName?.charAt(0) ?? 'C')}
                             </div>
                             <div className={cn('max-w-[75%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed',
                               isMe ? 'bg-blue-600 text-white rounded-tr-sm' : 'bg-zinc-900 text-zinc-200 border border-zinc-800 rounded-tl-sm')}>
@@ -203,13 +203,42 @@ export default function UserTasksPage() {
                       })
                     )}
                   </div>
-                  <div className="flex gap-3 items-end">
-                    <Textarea id="comment" placeholder="Send a message to your coach..." value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)} className="flex-1 resize-none" rows={2}
-                      onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendComment(); } }} />
-                    <Button size="icon" onClick={sendComment} isLoading={isSendingComment} className="mb-0.5 h-10 w-10">
-                      <Send className="w-4 h-4" />
-                    </Button>
+                  <div className="flex flex-col gap-2 mt-2">
+                    <Textarea id="comment" placeholder={t("Send a message or notes...") || "Send a message or notes..."} value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)} className="w-full resize-none bg-zinc-900" rows={2}
+                      onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); 
+                        if (commentText.trim()) sendComment(); 
+                      } }} />
+                    <div className="flex gap-2">
+                      <input 
+                        type="url" 
+                        placeholder={t("Paste Video Workout URL (Youtube, Drive, TikTok...)") || "Paste Video Workout URL (Youtube, Drive, TikTok...)"} 
+                        className="flex-1 px-3 py-2 text-sm bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500" 
+                        id="videoLink" 
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const vid = (e.target as HTMLInputElement).value;
+                            if (vid) {
+                              setCommentText(prev => prev ? prev + '\n🎥 Video: ' + vid : '🎥 Video: ' + vid);
+                              (e.target as HTMLInputElement).value = '';
+                            }
+                          }
+                        }}
+                      />
+                      <Button onClick={() => {
+                        const vidInput = document.getElementById('videoLink') as HTMLInputElement;
+                        const vid = vidInput.value;
+                        if (vid) {
+                          setCommentText(prev => prev ? prev + '\n🎥 Video: ' + vid : '🎥 Video: ' + vid);
+                          vidInput.value = '';
+                        }
+                        // Need small delay to let state update if we appended video
+                        setTimeout(sendComment, 50);
+                      }} isLoading={isSendingComment} className="gap-2 shrink-0">
+                        <Send className="w-4 h-4" /> {t("Send")} 
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>

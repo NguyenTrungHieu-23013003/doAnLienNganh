@@ -124,10 +124,10 @@
   "Student Progress": "Sự tiến bộ của học sinh",
   "Completion rate at a glance": "Tỷ lệ hoàn thành trong nháy mắt",
   "Completion rate": "Tỷ lệ hoàn thành",
-  "Assign New Task": "Assign New Task",
-  "Title": "Title",
-  "Description": "Description",
-  "Due Date": "Due Date",
-  "Assign": "Assign",
-  "Select Student": "Select Student"
+  "Assign New Task": "Giao nhiệm vụ mới",
+  "Title": "Tiêu đề",
+  "Description": "Sự miêu tả",
+  "Due Date": "Hai ngày",
+  "Assign": "Giao phó",
+  "Select Student": "Chọn sinh viên"
 }
