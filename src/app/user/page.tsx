@@ -5,16 +5,16 @@ import DashboardLayout from '@/shared/components/DashboardLayout';
 import { Card, CardContent, CardHeader } from '@/shared/components/Card';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Task, HealthMetric, AISuggestion } from '@/shared/types';
-import { useSession, signOut } from 'next-auth/react';
-import { Dumbbell, Scale, Activity, Calendar, BrainCircuit, CheckCheck, Flame, TrendingDown } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { Dumbbell, Scale, Activity, Calendar, BrainCircuit, Flame, TrendingDown } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import Link from 'next/link';
 import { useTranslation } from "react-i18next";
 
 export default function UserDashboard() {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
   const { data: session } = useSession();
-  const user = session?.user as any;
+  const user = session?.user as { id: string; role: string; fullName: string; name: string | null } | undefined;
   const [tasks, setTasks] = useState<Task[]>([]);
   const [metrics, setMetrics] = useState<HealthMetric[]>([]);
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
@@ -33,7 +33,10 @@ export default function UserDashboard() {
     setIsLoading(false);
   }, [user]);
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchAll();
+  }, [fetchAll]);
 
   const today = tasks.filter((t) => t.status !== 'done' && t.status !== 'blocked').slice(0, 3);
   const done = tasks.filter((t) => t.status === 'done').length;

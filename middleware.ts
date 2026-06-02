@@ -8,7 +8,7 @@ export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
   // NextAuth v5 Edge JWT decodes token directly sometimes instead of full session
-  const userRole = (req.auth?.user as any)?.role || (req.auth as any)?.role || "user";
+  const userRole = (req.auth?.user as { role?: string } | undefined)?.role || (req.auth as { role?: string } | undefined)?.role || "user";
 
   const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
   const isAuthRoute = nextUrl.pathname.startsWith("/auth"); // Bao gồm /auth/login, /auth/register, /auth/verify

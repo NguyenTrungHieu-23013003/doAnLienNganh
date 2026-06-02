@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getItem, updateItem, deleteItem, addItem } from '@/lib/mockDb';
-import { Task, TaskStatus } from '@/shared/types';
+import { Task } from '@/shared/types';
 import crypto from 'crypto';
 
 // GET /api/tasks/[id]

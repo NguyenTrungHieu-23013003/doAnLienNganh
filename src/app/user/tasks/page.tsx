@@ -5,10 +5,9 @@ import DashboardLayout from '@/shared/components/DashboardLayout';
 import { Card, CardContent, CardHeader } from '@/shared/components/Card';
 import { Button } from '@/shared/components/Button';
 import { StatusBadge } from '@/shared/components/StatusBadge';
-import { Modal } from '@/shared/components/Modal';
 import { Textarea } from '@/shared/components/FormFields';
 import { Task, Comment, TaskStatus, User } from '@/shared/types';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { Dumbbell, Salad, MessageSquare, Calendar, Ban, PlayCircle, CheckCheck, Send, X } from 'lucide-react';
 import { formatDate, cn } from '@/lib/utils';
 import { useTranslation } from "react-i18next";
@@ -25,9 +24,9 @@ const typeColor: Record<string, string> = {
 };
 
 export default function UserTasksPage() {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
   const { data: session } = useSession();
-  const user = session?.user as any;
+  const user = session?.user as { id: string; role: string; fullName: string; coachId?: string } | undefined;
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<TaskStatus | ''>('');
@@ -45,7 +44,10 @@ export default function UserTasksPage() {
     setIsLoading(false);
   }, [user]);
 
-  useEffect(() => { fetchTasks(); }, [fetchTasks]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchTasks();
+  }, [fetchTasks]);
 
   useEffect(() => {
     if (user?.coachId) {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { readDb, addItem, updateItem, deleteItem } from '@/lib/mockDb';
+import { readDb, addItem } from '@/lib/mockDb';
 import { User } from '@/shared/types';
 import crypto from 'crypto';
 

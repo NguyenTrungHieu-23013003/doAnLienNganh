@@ -5,7 +5,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { id } = await params;
   
   // Đánh dấu đã đọc
-  await updateItem<any>('notifications', id, { isRead: true });
+  await updateItem<{ id: string; isRead: boolean }>('notifications', id, { isRead: true });
   
   return NextResponse.json({ success: true });
 }

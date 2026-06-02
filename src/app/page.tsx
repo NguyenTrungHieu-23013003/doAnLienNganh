@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 
 export default async function Home() {
   const session = await auth();
-  const user = session?.user as any;
+  const user = session?.user as { role?: string } | undefined;
   
   if (!user) {
     redirect("/auth/login");

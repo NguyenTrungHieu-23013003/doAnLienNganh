@@ -5,7 +5,7 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/shared/components/Button';
 import { Card, CardContent, CardHeader } from '@/shared/components/Card';
-import { Activity, Dumbbell, ShieldCheck } from 'lucide-react';
+import { Activity } from 'lucide-react';
 import { useTranslation } from "react-i18next";
 import Link from 'next/link';
 

@@ -20,7 +20,16 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
   const [theme, setThemeState] = useState<Theme>('dark');
   const [mounted, setMounted] = useState(false);
 
+  const applyTheme = (t: Theme) => {
+    if (t === 'light') {
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+    }
+  };
+
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     const savedLang = localStorage.getItem('language') as Language;
     const savedTheme = localStorage.getItem('theme') as Theme;
@@ -33,14 +42,6 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
       applyTheme(savedTheme);
     }
   }, []);
-
-  const applyTheme = (t: Theme) => {
-    if (t === 'light') {
-      document.documentElement.classList.remove('dark');
-    } else {
-      document.documentElement.classList.add('dark');
-    }
-  };
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);

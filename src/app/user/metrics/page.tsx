@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader } from '@/shared/components/Card';
 import { Button } from '@/shared/components/Button';
 import { Input } from '@/shared/components/FormFields';
 import { HealthMetric } from '@/shared/types';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { Heart, Activity, Scale, TrendingDown, TrendingUp, Minus } from 'lucide-react';
 import { useTranslation } from "react-i18next";
 
@@ -35,9 +35,9 @@ function TrendIcon({ values }: { values: number[] }) {
 }
 
 export default function UserMetricsPage() {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
   const { data: session } = useSession();
-  const user = session?.user as any;
+  const user = session?.user as { id: string; role: string; fullName: string; name: string | null } | undefined;
   const [metrics, setMetrics] = useState<HealthMetric[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [form, setForm] = useState({ weight: '', heartRate: '', bodyFatPercentage: '' });
@@ -52,7 +52,10 @@ export default function UserMetricsPage() {
     setIsLoading(false);
   }, [user]);
 
-  useEffect(() => { fetchMetrics(); }, [fetchMetrics]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchMetrics();
+  }, [fetchMetrics]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

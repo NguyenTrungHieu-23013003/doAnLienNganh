@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/shared/components/DashboardLayout';
-import { Card, CardContent, CardHeader } from '@/shared/components/Card';
+import { Card, CardContent } from '@/shared/components/Card';
 import { Button } from '@/shared/components/Button';
 import { AISuggestion, HealthMetric } from '@/shared/types';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { BrainCircuit, Lightbulb, AlertTriangle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from "react-i18next";
@@ -17,9 +17,9 @@ const typeConfig: Record<AISuggestion['type'], { label: string; color: string; I
 };
 
 export default function UserInsightsPage() {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
   const { data: session } = useSession();
-  const user = session?.user as any;
+  const user = session?.user as { id: string; role: string; fullName: string; name: string | null } | undefined;
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
   const [metrics, setMetrics] = useState<HealthMetric[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +37,10 @@ export default function UserInsightsPage() {
     setIsLoading(false);
   }, [user]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData();
+  }, [fetchData]);
 
   const generateInsight = async () => {
     if (!user) return;

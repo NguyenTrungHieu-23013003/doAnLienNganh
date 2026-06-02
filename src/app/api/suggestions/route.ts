@@ -70,7 +70,7 @@ export async function POST(request: Request) {
 
     const data = await groqRes.json();
     suggestionText = data.choices?.[0]?.message?.content || "Keep up the great work!";
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Groq Integration Error:", error);
     return NextResponse.json({ error: 'Failed to generate insight from Groq.' }, { status: 500 });
   }

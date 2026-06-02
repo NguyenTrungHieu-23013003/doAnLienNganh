@@ -8,7 +8,7 @@ import { Modal } from '@/shared/components/Modal';
 import { Input, Select, Textarea } from '@/shared/components/FormFields';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Task, User, TaskType, TaskStatus } from '@/shared/types';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { Plus, Dumbbell, Salad, MessageSquare, CheckCircle2, Ban, ChevronRight, Calendar } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { useTranslation } from "react-i18next";
@@ -32,9 +32,9 @@ const typeColor: Record<TaskType, string> = {
 };
 
 export default function CoachTasksPage() {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
   const { data: session } = useSession();
-  const user = session?.user as any;
+  const user = session?.user as { id: string; role: string; fullName: string; name: string | null } | undefined;
   const [tasks, setTasks] = useState<Task[]>([]);
   const [students, setStudents] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,7 +55,10 @@ export default function CoachTasksPage() {
     setIsLoading(false);
   }, [user]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData();
+  }, [fetchData]);
 
   const updateStatus = async (taskId: string, status: TaskStatus) => {
     await fetch(`/api/tasks/${taskId}`, {

@@ -3,13 +3,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/shared/components/DashboardLayout';
 import { Card, CardContent, CardHeader } from '@/shared/components/Card';
-import { User, Task, HealthMetric } from '@/shared/types';
-import { Users, Dumbbell, ShieldCheck, TrendingUp, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
+import { User, Task } from '@/shared/types';
+import { Users, Dumbbell, ShieldCheck, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from "react-i18next";
 
 export default function AdminDashboard() {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,7 +24,10 @@ export default function AdminDashboard() {
     setIsLoading(false);
   }, []);
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchAll();
+  }, [fetchAll]);
 
   const numStudents = users.filter((u) => u.role === 'user').length;
   const numCoaches = users.filter((u) => u.role === 'coach').length;

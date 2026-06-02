@@ -5,7 +5,7 @@ import DashboardLayout from '@/shared/components/DashboardLayout';
 import { Card, CardContent, CardHeader } from '@/shared/components/Card';
 import { Button } from '@/shared/components/Button';
 import { User, AISuggestion } from '@/shared/types';
-import { BrainCircuit, RefreshCw, AlertTriangle, Lightbulb, TrendingUp } from 'lucide-react';
+import { BrainCircuit, RefreshCw, AlertTriangle, Lightbulb } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from "react-i18next";
 
@@ -16,7 +16,7 @@ const typeConfig: Record<AISuggestion['type'], { label: string; color: string; i
 };
 
 export default function AdminAIPage() {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
   const [students, setStudents] = useState<User[]>([]);
   const [allSuggestions, setAllSuggestions] = useState<AISuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,7 +35,10 @@ export default function AdminAIPage() {
     setIsLoading(false);
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData();
+  }, [fetchData]);
 
   const generateForUser = async (userId: string) => {
     setIsGenerating(userId);

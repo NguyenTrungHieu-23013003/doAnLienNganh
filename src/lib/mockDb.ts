@@ -10,7 +10,7 @@ export async function readDb<T>(collection: string): Promise<T[]> {
 }
 
 export async function writeDb<T>(collection: string, data: T[]): Promise<void> {
-  const { error } = await supabase.from(collection).upsert(data as any[]);
+  const { error } = await supabase.from(collection).upsert(data as never[]);
   if (error) {
     console.error(`Error writing ${collection}:`, error);
   }
@@ -23,7 +23,7 @@ export async function getItem<T extends { id: string }>(collection: string, id: 
 }
 
 export async function addItem<T extends { id: string }>(collection: string, item: T): Promise<void> {
-  const { error } = await supabase.from(collection).insert(item as any);
+  const { error } = await supabase.from(collection).insert(item as never);
   if (error) {
     console.error(`Error adding item to ${collection}:`, error);
   }
@@ -34,13 +34,13 @@ export async function updateItem<T extends { id: string }>(
   id: string,
   updates: Partial<T>
 ): Promise<void> {
-  const { error } = await supabase.from(collection).update(updates as any).eq('id', id);
+  const { error } = await supabase.from(collection).update(updates as never).eq('id', id);
   if (error) {
     console.error(`Error updating item in ${collection}:`, error);
   }
 }
 
-export async function deleteItem<T extends { id: string }>(collection: string, id: string): Promise<void> {
+export async function deleteItem(collection: string, id: string): Promise<void> {
   const { error } = await supabase.from(collection).delete().eq('id', id);
   if (error) {
     console.error(`Error deleting item in ${collection}:`, error);

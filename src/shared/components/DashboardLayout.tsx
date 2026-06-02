@@ -11,7 +11,7 @@ import ChatBot from '@/shared/components/ChatBot';
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const isLoading = status === 'loading';
-  const user = session?.user as any; // Cast user to any for custom role accessing
+  const user = session?.user as { id: string, role?: string, fullName?: string, name?: string | null } | undefined;
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -57,7 +57,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       
       {/* Thêm ChatBot cho User role */}
       {user.role === 'user' && (
-        <ChatBot userId={user.id} userName={user.fullName || user.name} />
+        <ChatBot userId={user.id} userName={user.fullName || user.name || "User"} />
       )}
     </div>
   );

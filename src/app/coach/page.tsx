@@ -3,18 +3,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/shared/components/DashboardLayout';
 import { Card, CardContent, CardHeader } from '@/shared/components/Card';
-import { Task, User, HealthMetric } from '@/shared/types';
-import { useSession, signOut } from 'next-auth/react';
+import { Task, User } from '@/shared/types';
+import { useSession } from 'next-auth/react';
 import { StatusBadge } from '@/shared/components/StatusBadge';
-import { Users, ClipboardList, AlertCircle, CheckCircle2, Calendar, TrendingUp } from 'lucide-react';
-import { formatDate } from '@/lib/utils';
+import { Users, ClipboardList, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from "react-i18next";
 
 export default function CoachDashboard() {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
   const { data: session } = useSession();
-  const user = session?.user as any;
+  const user = session?.user as { id: string; role: string; fullName: string; name: string | null } | undefined;
   const [tasks, setTasks] = useState<Task[]>([]);
   const [students, setStudents] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,7 +29,10 @@ export default function CoachDashboard() {
     setIsLoading(false);
   }, [user]);
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchAll();
+  }, [fetchAll]);
 
   const reviewTasks = tasks.filter((t) => t.status === 'review');
   const blockedTasks = tasks.filter((t) => t.status === 'blocked');

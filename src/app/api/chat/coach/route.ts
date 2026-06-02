@@ -65,7 +65,7 @@ ${JSON.stringify(studentTasks, null, 2)}
     const reply = data.choices?.[0]?.message?.content || "No advice available at this moment.";
 
     return NextResponse.json({ reply });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Coach Chat API Error:", error);
     return NextResponse.json({ error: 'Failed to process coach chat request.' }, { status: 500 });
   }

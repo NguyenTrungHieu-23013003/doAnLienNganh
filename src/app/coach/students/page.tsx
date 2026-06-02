@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/shared/components/DashboardLayout';
 import { Card, CardContent, CardHeader } from '@/shared/components/Card';
 import { User, Task } from '@/shared/types';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Button } from '@/shared/components/Button';
 import { Activity, Dumbbell, Calendar, AlertCircle, CheckCircle2, Send, Bot } from 'lucide-react';
@@ -18,9 +18,9 @@ interface StudentWithStats extends User {
 }
 
 export default function CoachStudentsPage() {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
   const { data: session } = useSession();
-  const user = session?.user as any;
+  const user = session?.user as { id: string; role: string; fullName: string; name: string | null } | undefined;
   const [students, setStudents] = useState<StudentWithStats[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selected, setSelected] = useState<StudentWithStats | null>(null);
@@ -29,8 +29,9 @@ export default function CoachStudentsPage() {
   const [chatLoading, setChatLoading] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (selected) setChatHistory([{ role: 'assistant', content: `Ask me about ${selected.fullName}'s progress` }]);
-  }, [selected?.id]);
+  }, [selected]);
 
   const sendCoachMessage = async () => {
     if (!chatInput.trim() || chatLoading || !selected || !user) return;
@@ -53,7 +54,7 @@ export default function CoachStudentsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setChatHistory([...newHistory, { role: 'assistant', content: data.reply }]);
-    } catch (e) {
+    } catch {
       setChatHistory([...newHistory, { role: 'assistant', content: "Error connecting to AI assistant." }]);
     } finally {
       setChatLoading(false);
@@ -88,7 +89,10 @@ export default function CoachStudentsPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData();
+  }, [fetchData]);
 
   const selectedLatest = selected?.tasks.slice(0, 5) ?? [];
 

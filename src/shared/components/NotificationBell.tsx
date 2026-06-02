@@ -35,6 +35,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
   }, [userId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotifications();
     
     // 1. Polling: Tự động tải lại mỗi 3 giây để lấy thông báo cross-user (khác tab/ máy)

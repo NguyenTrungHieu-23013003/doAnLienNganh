@@ -45,13 +45,16 @@ export async function POST(req: Request) {
             subject: 'FitnessTracker - Mã OTP Xác Thực Mới',
             html: `<h1>Xin chào ${user.fullName}!</h1><p>Mã xác thực OTP mới của bạn là: <strong>${otp}</strong></p><p>Vui lòng nhập mã này trên web để kích hoạt tài khoản.</p>`
          });
-       } catch (emailError: any) {
+       } catch (emailError: unknown) {
          console.error('Error sending resend OTP email:', emailError);
        }
     }
     
     return NextResponse.json({ success: true, message: 'Đã gửi lại OTP thành công.' });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      return NextResponse.json({ error: err.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
 }
