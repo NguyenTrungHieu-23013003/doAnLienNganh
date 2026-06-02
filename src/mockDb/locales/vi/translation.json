@@ -129,5 +129,11 @@
   "Description": "Sự miêu tả",
   "Due Date": "Hai ngày",
   "Assign": "Giao phó",
-  "Select Student": "Chọn sinh viên"
+  "Select Student": "Chọn sinh viên",
+  "Overdue": "Quá hạn",
+  "Due Today": "Đến hạn hôm nay",
+  "Due Soon": "Sắp đến hạn",
+  "Video URL (YouTube, Drive, TikTok...)": "Link video (YouTube, Drive, TikTok...)",
+  "No description provided.": "Chưa có mô tả.",
+  "Send a message or notes...": "Gửi tin nhắn hoặc ghi chú..."
 }
