@@ -23,8 +23,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, message: 'Tài khoản đã được xác thực' });
     }
 
-    if (user.verification_otp !== otp) {
+    if (!user.verification_otp) {
+      return NextResponse.json({ error: 'Mã OTP không hợp lệ' }, { status: 400 });
+    }
+
+    const [storedCode, storedExpiresAt] = user.verification_otp.split('_');
+
+    if (storedCode !== otp) {
       return NextResponse.json({ error: 'Mã OTP không đúng' }, { status: 400 });
+    }
+
+    if (storedExpiresAt && Date.now() > parseInt(storedExpiresAt, 10)) {
+      return NextResponse.json({ error: 'Mã OTP đã hết hạn, vui lòng gửi lại mã mới' }, { status: 400 });
     }
 
     // Kích hoạt tài khoản

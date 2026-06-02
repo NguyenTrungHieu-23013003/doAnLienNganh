@@ -11,27 +11,40 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Vui lòng điền đầy đủ thông tin' }, { status: 400 });
     }
 
-    const { data: existing } = await supabase.from('users').select('id').eq('email', email).maybeSingle();
-    if (existing) {
-      return NextResponse.json({ error: 'Email đã tồn tại!' }, { status: 400 });
+    const { data: existing } = await supabase.from('users').select('id, is_verified').eq('email', email).maybeSingle();
+    if (existing && existing.is_verified) {
+      return NextResponse.json({ error: 'Email đã được sử dụng!' }, { status: 400 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Mã 6 số ngẫu nhiên
-    
-    // We add password field implicitly since the db schema handles it or we manually added it
-    const { error } = await supabase.from('users').insert({
-      id: `user-${crypto.randomUUID()}`,
-      fullName: name,
-      email: email,
-      password: hashedPassword,
-      role: 'user', // Mặc định tất cả người đăng ký mới là 'user'
-      is_verified: false,
-      verification_otp: otp,
-      createdAt: new Date().toISOString()
-    });
+    const expiresAt = Date.now() + 2 * 60 * 1000; // Hết hạn sau 2 phút
+    const otpToStore = `${otp}_${expiresAt}`;
 
-    if (error) throw error;
+    if (existing && !existing.is_verified) {
+      // Cập nhật lại thông tin nếu user chưa xác thực nhưng đăng ký lại
+      const { error: updateError } = await supabase.from('users').update({
+        fullName: name,
+        password: hashedPassword,
+        verification_otp: otpToStore
+      }).eq('email', email);
+      
+      if (updateError) throw updateError;
+    } else {
+      // Tạo user mới
+      const { error: insertError } = await supabase.from('users').insert({
+        id: `user-${crypto.randomUUID()}`,
+        fullName: name,
+        email: email,
+        password: hashedPassword,
+        role: 'user', // Mặc định tất cả người đăng ký mới là 'user'
+        is_verified: false,
+        verification_otp: otpToStore,
+        createdAt: new Date().toISOString()
+      });
+
+      if (insertError) throw insertError;
+    }
     
     // Gửi email chứa OTP qua Resend
     if (process.env.RESEND_API_KEY) {

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Activity } from 'lucide-react';
 import { Button } from '@/shared/components/Button';
 
-export default function VerifyOTPPage() {
+function VerifyOTPContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
@@ -14,7 +14,8 @@ export default function VerifyOTPPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendCooldown, setResendCooldown] = useState(60);
+  const [otpExpiresIn, setOtpExpiresIn] = useState(120);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -27,6 +28,13 @@ export default function VerifyOTPPage() {
       return () => clearTimeout(t);
     }
   }, [resendCooldown]);
+
+  useEffect(() => {
+    if (otpExpiresIn > 0) {
+      const t = setTimeout(() => setOtpExpiresIn((c) => c - 1), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [otpExpiresIn]);
 
   const handleChange = (index: number, value: string) => {
     if (!/^\d?$/.test(value)) return;
@@ -84,6 +92,13 @@ export default function VerifyOTPPage() {
             Nhập mã 6 chữ số đã được gửi đến<br />
             <span className="text-blue-400 font-medium">{email}</span>
           </p>
+          <div className="mt-4 flex items-center justify-center gap-2 text-sm font-medium">
+            <span className="text-zinc-400">Thời gian còn lại:</span>
+            <span className={otpExpiresIn > 30 ? "text-amber-400" : "text-red-500 animate-pulse"}>
+              {Math.floor(otpExpiresIn / 60).toString().padStart(2, '0')}:
+              {(otpExpiresIn % 60).toString().padStart(2, '0')}
+            </span>
+          </div>
         </div>
 
         {/* OTP Boxes */}
@@ -125,10 +140,31 @@ export default function VerifyOTPPage() {
             <span className="text-zinc-500">Gửi lại sau {resendCooldown}s</span>
           ) : (
             <button
-              className="text-blue-400 hover:text-blue-300 font-semibold"
-              onClick={() => {
-                setResendCooldown(60);
-                // TODO: Call resend OTP API
+              className="text-blue-400 hover:text-blue-300 font-semibold disabled:opacity-50"
+              disabled={isLoading}
+              onClick={async () => {
+                setError('');
+                setSuccess('');
+                setIsLoading(true);
+                try {
+                  const res = await fetch('/api/auth/resend-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }),
+                  });
+                  const data = await res.json();
+                  if (!res.ok) {
+                    setError(data.error || 'Lỗi khi gửi lại OTP');
+                  } else {
+                    setSuccess('Đã gửi lại mã OTP vào email của bạn');
+                    setResendCooldown(60);
+                    setOtpExpiresIn(120);
+                  }
+                } catch {
+                  setError('Lỗi kết nối, vui lòng thử lại');
+                } finally {
+                  setIsLoading(false);
+                }
               }}
             >
               Gửi lại
@@ -144,3 +180,12 @@ export default function VerifyOTPPage() {
     </div>
   );
 }
+
+export default function VerifyOTPPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-black text-white">Đang tải...</div>}>
+      <VerifyOTPContent />
+    </Suspense>
+  );
+}
+

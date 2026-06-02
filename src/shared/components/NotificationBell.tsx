@@ -20,7 +20,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = React.useCallback(async () => {
     try {
       // Để tránh Next.js Client Cache hoặc Browser Cache lưu lại request GET,
       // ta thêm param thời gian (t) luôn thay đổi và headers chống lưu cache.
@@ -32,7 +32,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [userId]);
 
   useEffect(() => {
     fetchNotifications();
@@ -60,7 +60,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
       clearInterval(intervalId);
       window.fetch = originalFetch; 
     };
-  }, [userId]);
+  }, [userId, fetchNotifications]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

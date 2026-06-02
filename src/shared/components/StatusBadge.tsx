@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { TaskStatus } from '@/shared/types';
-import { CheckCircle2, Clock, AlertCircle, Ban, Eye } from 'lucide-react';
+import { CheckCircle2, Clock, Ban, Eye } from 'lucide-react';
 
 const config: Record<TaskStatus, { label: string; className: string; Icon: React.FC<{ className?: string }> }> = {
   todo: { label: 'To Do', className: 'bg-zinc-800 text-zinc-400 border-zinc-700', Icon: Clock },

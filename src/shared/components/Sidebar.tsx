@@ -6,8 +6,8 @@ import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 import {
-  LayoutDashboard, Users, Dumbbell, Activity, MessageSquare,
-  LogOut, ChevronRight, BrainCircuit, ShieldCheck, ClipboardList, Scale,
+  LayoutDashboard, Users, Dumbbell, Activity,
+  LogOut, ChevronRight, BrainCircuit, ClipboardList, Scale,
   Settings,
 } from 'lucide-react';
 import { useSettings } from '@/features/settings/SettingsContext';
@@ -36,7 +36,7 @@ const menuItemsByRole = {
 
 export const Sidebar = () => {
   const { data: session } = useSession();
-  const user = session?.user as any;
+  const user = session?.user as { name?: string | null, role?: string, fullName?: string } | undefined;
   const logout = () => signOut();
   const pathname = usePathname();
   const { language, theme, setLanguage, setTheme } = useSettings();
