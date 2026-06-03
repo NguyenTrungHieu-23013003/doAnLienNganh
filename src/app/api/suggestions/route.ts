@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   }
 
   // 2. Build a system prompt
-  const systemPrompt = "You are a fitness and nutrition coach. Analyze the user health data and give specific, concise feedback. Respond in 2-3 short sentences. Do not use introductory greetings.";
+  const systemPrompt = "You are a fitness and nutrition coach. Analyze the user health data and give specific, concise feedback. Respond in 2-3 short sentences. ONLY respond in Vietnamese language (Tiếng Việt). Do not use introductory greetings.";
   const userMessage = `User Metrics Data (Latest first):\n${JSON.stringify(userMetrics, null, 2)}`;
 
   // 3. Send metrics as user message to Groq
