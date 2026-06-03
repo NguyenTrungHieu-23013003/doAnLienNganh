@@ -149,5 +149,22 @@
   "Workout": "Workout",
   "Nutrition": "Nutrition",
   "Consultation": "Consultation",
-  "Returned": "Returned"
+  "Returned": "Returned",
+  "Flat list": "Flat list",
+  "Group by student": "Group by student",
+  "Delete task": "Delete task",
+  "Delete?": "Delete?",
+  "Yes": "Yes",
+  "No": "No",
+  "Task Title": "Task Title",
+  "Type": "Type",
+  "Description / Instructions": "Description / Instructions",
+  "Describe the workout or nutrition plan in detail...": "Describe the workout or nutrition plan in detail...",
+  "Student": "Student",
+  "e.g. Upper Body Strength Training": "e.g. Upper Body Strength Training",
+  "Recent Tasks": "Recent Tasks",
+  "Latest 5 assigned tasks": "Latest 5 assigned tasks",
+  "AI Assistant": "AI Assistant",
+  "Data-driven insights for this student": "Data-driven insights for this student",
+  "Ask a question...": "Ask a question..."
 }

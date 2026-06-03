@@ -25,7 +25,7 @@ export default function CoachStudentsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selected, setSelected] = useState<StudentWithStats | null>(null);
   const [chatInput, setChatInput] = useState('');
-  const [chatHistory, setChatHistory] = useState<{role: 'user'|'assistant', content: string}[]>([]);
+  const [chatHistory, setChatHistory] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
   const [chatLoading, setChatLoading] = useState(false);
 
   useEffect(() => {
@@ -99,7 +99,7 @@ export default function CoachStudentsPage() {
     setStudents(enriched);
     if (enriched.length > 0 && !selected) setSelected(enriched[0]);
     setIsLoading(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   useEffect(() => {
@@ -114,7 +114,7 @@ export default function CoachStudentsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Student List */}
         <Card className="border-zinc-800 lg:col-span-1">
-          <CardHeader title="My Students" subtitle={`${students.length} assigned`} />
+          <CardHeader title={t("My Students")} subtitle={`${students.length} assigned`} />
           <CardContent className="p-3">
             {isLoading ? (
               <div className="flex justify-center py-10">
@@ -178,9 +178,9 @@ export default function CoachStudentsPage() {
                   </div>
                   <div className="grid grid-cols-3 gap-4">
                     {[
-                      { label: 'Total Tasks', value: selected.tasks.length, icon: Dumbbell },
-                      { label: 'Completed', value: selected.tasks.filter((t) => t.status === 'done').length, icon: CheckCircle2 },
-                      { label: 'In Review', value: selected.tasks.filter((t) => t.status === 'review').length, icon: Activity },
+                      { label: t('Total Tasks'), value: selected.tasks.length, icon: Dumbbell },
+                      { label: t('Completed'), value: selected.tasks.filter((t) => t.status === 'done').length, icon: CheckCircle2 },
+                      { label: t('In Review'), value: selected.tasks.filter((t) => t.status === 'review').length, icon: Activity },
                     ].map((s) => (
                       <div key={s.label} className="text-center p-4 rounded-xl bg-zinc-900 border border-zinc-800">
                         <s.icon className="w-5 h-5 text-zinc-500 mx-auto mb-2" />
@@ -193,7 +193,7 @@ export default function CoachStudentsPage() {
               </Card>
 
               <Card className="border-zinc-800">
-                <CardHeader title="Recent Tasks" subtitle="Latest 5 assigned tasks" />
+                <CardHeader title={t("Recent Tasks")} subtitle={t("Latest 5 assigned tasks")} />
                 <CardContent className="p-0">
                   {selectedLatest.length === 0 ? (
                     <p className="text-center text-zinc-600 py-8 text-sm">{t("No tasks assigned yet.")}</p>
@@ -217,7 +217,7 @@ export default function CoachStudentsPage() {
 
               {/* Inline Chat panel for the selected student */}
               <Card className="border-zinc-800">
-                <CardHeader title="AI Assistant" subtitle="Data-driven insights for this student" />
+                <CardHeader title={t("AI Assistant")} subtitle={t("Data-driven insights for this student")} />
                 <CardContent className="space-y-4">
                   <div className="h-64 overflow-y-auto space-y-4 p-4 rounded-xl bg-zinc-950 border border-zinc-800 flex flex-col">
                     {chatHistory.map((m, i) => (
@@ -236,12 +236,12 @@ export default function CoachStudentsPage() {
                     )}
                   </div>
                   <div className="flex gap-2">
-                    <input 
-                      type="text" 
-                      value={chatInput} 
+                    <input
+                      type="text"
+                      value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && sendCoachMessage()}
-                      placeholder="Ask a question..."
+                      placeholder={t("Ask a question...")}
                       className="flex-1 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white focus:outline-none focus:border-blue-500"
                     />
                     <Button onClick={sendCoachMessage} isLoading={chatLoading} className="px-4">

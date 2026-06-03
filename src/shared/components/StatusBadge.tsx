@@ -1,6 +1,9 @@
+'use client';
+
 import { cn } from '@/lib/utils';
 import { TaskStatus } from '@/shared/types';
 import { CheckCircle2, Clock, Ban, Eye } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const config: Record<TaskStatus, { label: string; className: string; Icon: React.FC<{ className?: string }> }> = {
   todo: { label: 'To Do', className: 'bg-zinc-800 text-zinc-400 border-zinc-700', Icon: Clock },
@@ -16,6 +19,7 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
+  const { t } = useTranslation();
   const { label, className: statusClass, Icon } = config[status];
   return (
     <span className={cn(
@@ -24,7 +28,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
       className
     )}>
       <Icon className="w-3 h-3" />
-      {label}
+      {t(label)}
     </span>
   );
 }

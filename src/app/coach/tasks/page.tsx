@@ -12,7 +12,7 @@ import { useSession } from 'next-auth/react';
 import {
   Plus, Dumbbell, Salad, MessageSquare, CheckCircle2, Ban,
   ChevronRight, Calendar, X, Send, CornerDownLeft, UserCircle2,
-  AlertCircle,
+  AlertCircle, Trash2, Users, List,
 } from 'lucide-react';
 import { formatDate, cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -46,7 +46,58 @@ function relativeTime(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-// ── Component ────────────────────────────────────────────────
+// ── TaskCard sub-component ───────────────────────────────────
+function TaskCard({
+  task, student, isSelected, onClick, hideStudent = false,
+}: {
+  task: Task;
+  student: User | undefined;
+  isSelected: boolean;
+  onClick: () => void;
+  hideStudent?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'w-full text-left p-3.5 rounded-xl border transition-all',
+        isSelected
+          ? 'border-blue-600/40 bg-blue-600/5'
+          : task.status === 'review'
+            ? 'border-amber-900/40 bg-zinc-950/50 hover:border-amber-800/50'
+            : task.status === 'blocked'
+              ? 'border-red-900/40 bg-zinc-950/50 hover:border-red-800/50'
+              : 'border-zinc-800 bg-zinc-950/50 hover:border-zinc-700',
+      )}
+    >
+      <div className="flex items-start gap-3">
+        <div className={cn('p-1.5 rounded-lg shrink-0 mt-0.5', typeColor[task.type])}>
+          {typeIcon[task.type]}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm truncate">{task.title}</p>
+          <div className="flex items-center justify-between mt-1.5 gap-2">
+            {!hideStudent && (
+              <div className="flex items-center gap-1.5 text-[11px] text-zinc-500">
+                <div className="w-4 h-4 rounded-full bg-zinc-800 flex items-center justify-center text-[9px] font-bold shrink-0">
+                  {student?.fullName.charAt(0) ?? '?'}
+                </div>
+                <span className="truncate max-w-[80px]">{student?.fullName ?? '—'}</span>
+              </div>
+            )}
+            <StatusBadge status={task.status} />
+          </div>
+          <div className="flex items-center gap-1 mt-1 text-[10px] text-zinc-600">
+            <Calendar className="w-3 h-3" />
+            {formatDate(task.dueDate)}
+          </div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+// ── Main Component ────────────────────────────────────────────
 export default function CoachTasksPage() {
   const { t } = useTranslation();
   const { data: session } = useSession();
@@ -76,6 +127,11 @@ export default function CoachTasksPage() {
   const [showReturnForm, setShowReturnForm] = useState(false);
   const [returnNote, setReturnNote] = useState('');
   const [isReturning, setIsReturning] = useState(false);
+
+  // View mode & delete state
+  const [viewMode, setViewMode] = useState<'flat' | 'grouped'>('flat');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // ── Data fetching ────────────────────────────────────────
   const fetchData = useCallback(async () => {
@@ -178,6 +234,16 @@ export default function CoachTasksPage() {
     fetchData();
   };
 
+  const handleDelete = async () => {
+    if (!selectedTask) return;
+    setIsDeleting(true);
+    await fetch(`/api/tasks/${selectedTask.id}`, { method: 'DELETE' });
+    setSelectedTask(null);
+    setShowDeleteConfirm(false);
+    setIsDeleting(false);
+    fetchData();
+  };
+
   // ── Derived ──────────────────────────────────────────────
   const displayed = filterStatus ? tasks.filter((t) => t.status === filterStatus) : tasks;
   const reviewCount = tasks.filter((t) => t.status === 'review').length;
@@ -189,6 +255,21 @@ export default function CoachTasksPage() {
   const selectedStudent = selectedTask
     ? students.find((s) => s.id === selectedTask.userId)
     : null;
+
+  // Group tasks by student for grouped view
+  const groupedByStudent = (() => {
+    const map = new Map<string, { student: User | undefined; tasks: Task[] }>();
+    for (const task of displayed) {
+      if (!map.has(task.userId)) {
+        map.set(task.userId, {
+          student: students.find((s) => s.id === task.userId),
+          tasks: [],
+        });
+      }
+      map.get(task.userId)!.tasks.push(task);
+    }
+    return Array.from(map.values());
+  })();
 
   // ── Render ───────────────────────────────────────────────
   return (
@@ -231,7 +312,7 @@ export default function CoachTasksPage() {
           {/* ── Left: Task list ── */}
           <div className="lg:col-span-2 space-y-3">
             {/* List header */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value as TaskStatus | '')}
@@ -244,6 +325,23 @@ export default function CoachTasksPage() {
                 <option value="done">{t('Done')}</option>
                 <option value="blocked">{t('Blocked')}</option>
               </select>
+              {/* View mode toggle */}
+              <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-lg p-0.5 shrink-0">
+                <button
+                  onClick={() => setViewMode('flat')}
+                  title={t('Flat list') || 'Flat list'}
+                  className={cn('p-1.5 rounded-md transition-colors', viewMode === 'flat' ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300')}
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setViewMode('grouped')}
+                  title={t('Group by student') || 'Group by student'}
+                  className={cn('p-1.5 rounded-md transition-colors', viewMode === 'grouped' ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300')}
+                >
+                  <Users className="w-3.5 h-3.5" />
+                </button>
+              </div>
               <Button onClick={() => setIsCreateOpen(true)} className="gap-1.5 shrink-0 text-xs px-3 py-2">
                 <Plus className="w-4 h-4" /> {t('Assign Task')}
               </Button>
@@ -257,50 +355,45 @@ export default function CoachTasksPage() {
               <div className="text-center py-16 text-zinc-600 text-sm border-2 border-dashed border-zinc-800 rounded-xl">
                 {t('No tasks found.')}
               </div>
-            ) : (
+            ) : viewMode === 'flat' ? (
               <div className="space-y-2">
-                {displayed.map((task) => {
-                  const student = students.find((s) => s.id === task.userId);
-                  const isSelected = selectedTask?.id === task.id;
-                  return (
-                    <button
-                      key={task.id}
-                      onClick={() => openTask(task)}
-                      className={cn(
-                        'w-full text-left p-3.5 rounded-xl border transition-all',
-                        isSelected
-                          ? 'border-blue-600/40 bg-blue-600/5'
-                          : task.status === 'review'
-                            ? 'border-amber-900/40 bg-zinc-950/50 hover:border-amber-800/50'
-                            : task.status === 'blocked'
-                              ? 'border-red-900/40 bg-zinc-950/50 hover:border-red-800/50'
-                              : 'border-zinc-800 bg-zinc-950/50 hover:border-zinc-700',
-                      )}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className={cn('p-1.5 rounded-lg shrink-0 mt-0.5', typeColor[task.type])}>
-                          {typeIcon[task.type]}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm truncate">{task.title}</p>
-                          <div className="flex items-center justify-between mt-1.5 gap-2">
-                            <div className="flex items-center gap-1.5 text-[11px] text-zinc-500">
-                              <div className="w-4 h-4 rounded-full bg-zinc-800 flex items-center justify-center text-[9px] font-bold shrink-0">
-                                {student?.fullName.charAt(0) ?? '?'}
-                              </div>
-                              <span className="truncate max-w-[80px]">{student?.fullName ?? '—'}</span>
-                            </div>
-                            <StatusBadge status={task.status} />
-                          </div>
-                          <div className="flex items-center gap-1 mt-1 text-[10px] text-zinc-600">
-                            <Calendar className="w-3 h-3" />
-                            {formatDate(task.dueDate)}
-                          </div>
-                        </div>
+                {displayed.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    student={students.find((s) => s.id === task.userId)}
+                    isSelected={selectedTask?.id === task.id}
+                    onClick={() => openTask(task)}
+                  />
+                ))}
+              </div>
+            ) : (
+              // Grouped by student
+              <div className="space-y-4">
+                {groupedByStudent.map(({ student, tasks: sTasks }) => (
+                  <div key={student?.id ?? 'unknown'}>
+                    {/* Student group header */}
+                    <div className="flex items-center gap-2 mb-2 px-1">
+                      <div className="w-6 h-6 rounded-full bg-zinc-800 flex items-center justify-center text-[11px] font-bold shrink-0">
+                        {student?.fullName.charAt(0) ?? '?'}
                       </div>
-                    </button>
-                  );
-                })}
+                      <span className="text-xs font-bold text-zinc-400 truncate">{student?.fullName ?? '—'}</span>
+                      <span className="ml-auto text-[10px] text-zinc-600 font-medium">{sTasks.length} {t('tasks')}</span>
+                    </div>
+                    <div className="space-y-1.5 pl-2 border-l border-zinc-800">
+                      {sTasks.map((task) => (
+                        <TaskCard
+                          key={task.id}
+                          task={task}
+                          student={student}
+                          isSelected={selectedTask?.id === task.id}
+                          onClick={() => openTask(task)}
+                          hideStudent
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -315,8 +408,36 @@ export default function CoachTasksPage() {
                 >
                   <div className="flex items-center gap-2">
                     <StatusBadge status={selectedTask.status} />
+                    {/* Delete button */}
+                    {!showDeleteConfirm ? (
+                      <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        title={t('Delete task') || 'Delete task'}
+                        className="p-1.5 rounded-lg hover:bg-red-900/30 text-zinc-600 hover:text-red-400 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-1.5 bg-red-950/30 border border-red-900/40 rounded-lg px-2 py-1">
+                        <span className="text-[11px] text-red-300 font-medium">{t('Delete?')}</span>
+                        <button
+                          onClick={handleDelete}
+                          disabled={isDeleting}
+                          className="text-[11px] font-bold text-red-400 hover:text-red-300 disabled:opacity-50"
+                        >
+                          {isDeleting ? '…' : t('Yes')}
+                        </button>
+                        <span className="text-zinc-700">·</span>
+                        <button
+                          onClick={() => setShowDeleteConfirm(false)}
+                          className="text-[11px] text-zinc-500 hover:text-zinc-300"
+                        >
+                          {t('No')}
+                        </button>
+                      </div>
+                    )}
                     <button
-                      onClick={() => setSelectedTask(null)}
+                      onClick={() => { setSelectedTask(null); setShowDeleteConfirm(false); }}
                       className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500"
                     >
                       <X className="w-4 h-4" />
