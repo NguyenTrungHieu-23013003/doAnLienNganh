@@ -12,7 +12,7 @@ export default function Leaderboard({ isCoachView = false }: { isCoachView?: boo
   const { t } = useTranslation();
   const { data: session } = useSession();
   const [scope, setScope] = useState<'global' | 'group'>(isCoachView ? 'group' : 'global');
-  const [data, setData] = useState<{ leaderboard: LeaderboardUser[], currentUserData: LeaderboardUser | null } | null>(null);
+  const [data, setData] = useState<{ leaderboard: LeaderboardUser[], currentUserData: LeaderboardUser | null, error?: string } | null>(null);
 
   const user = session?.user as any;
 
@@ -54,14 +54,20 @@ export default function Leaderboard({ isCoachView = false }: { isCoachView?: boo
 
         {/* List */}
         <div className="space-y-2">
-          {data?.leaderboard.map((u) => (
-            <UserRow key={u.id} user={u} isMe={u.id === user?.id} />
-          ))}
-
-          {data?.currentUserData && !data.leaderboard.find(u => u.id === data.currentUserData!.id) && (
+          {data?.error ? (
+            <div className="text-center text-sm text-red-500 py-4">{data.error}</div>
+          ) : (
             <>
-              <div className="text-center text-xs text-zinc-600 pb-1">...</div>
-              <UserRow user={data.currentUserData} isMe={true} />
+              {data?.leaderboard?.map((u) => (
+                <UserRow key={u.id} user={u} isMe={u.id === user?.id} />
+              ))}
+              
+              {data?.currentUserData && !data?.leaderboard?.find(u => u.id === data.currentUserData!.id) && (
+                <>
+                  <div className="text-center text-xs text-zinc-600 pb-1">...</div>
+                  <UserRow user={data.currentUserData} isMe={true} />
+                </>
+              )}
             </>
           )}
         </div>

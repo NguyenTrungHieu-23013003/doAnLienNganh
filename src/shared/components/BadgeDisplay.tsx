@@ -25,7 +25,7 @@ export default function BadgeDisplay() {
     fetch(`/api/badges/check?userId=${user.id}`).then(res => res.json()).then(setData);
   }, [user]);
 
-  if (!data) return null;
+  if (!data || data.error) return null;
 
   const earnedMap = new Map(data.badges?.map((b: any) => [b.type, b.earnedAt]));
 
