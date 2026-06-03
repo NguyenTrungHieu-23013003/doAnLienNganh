@@ -15,12 +15,11 @@ export async function GET(request: Request) {
   const userId = searchParams.get('userId');
 
   let notifications = await readDb<Notification>('notifications');
-  
+
   if (userId) {
     notifications = notifications.filter((n) => n.userId === userId);
   }
-  
-  // Sắp xếp mới nhất lên đầu
+
   notifications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return NextResponse.json(notifications, { headers: { 'Cache-Control': 'no-store' } });
