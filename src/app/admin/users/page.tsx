@@ -132,7 +132,7 @@ export default function AdminUsersPage() {
 
         {/* User Table */}
         <Card className="border-zinc-800">
-          <CardHeader title="User Management" subtitle="Create, edit, and manage all platform accounts">
+          <CardHeader title={t("User Management")} subtitle={t("Create, edit, and manage all platform accounts")}>
             <div className="flex items-center gap-3">
               <select
                 value={filterRole}

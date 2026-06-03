@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getItem, updateItem, deleteItem, addItem } from '@/lib/mockDb';
-import { User } from '@/shared/types';
+import { addItem } from '@/lib/mockDb';
 import crypto from 'crypto';
+import { supabase } from '@/lib/supabase';
 
 // GET /api/users/[id]
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const user = await getItem<User>('users', id);
-  if (!user) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  const { data: user, error } = await supabase.from('users').select('*').eq('id', id).single();
+  if (error || !user) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json(user, { headers: { 'Cache-Control': 'no-store' } });
 }
 
@@ -16,9 +16,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { id } = await params;
   const body = await request.json();
   
-  const oldUser = await getItem<User>('users', id);
-  await updateItem<User>('users', id, body);
-  const updated = await getItem<User>('users', id);
+  const { data: oldUser } = await supabase.from('users').select('coachId').eq('id', id).single();
+  
+  const updateData = { ...body };
+  if (updateData.coachId === '') updateData.coachId = null;
+
+  const { data: updated, error } = await supabase.from('users').update(updateData).eq('id', id).select().single();
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   // Nếu có sự thay đổi coachId (Admin gắn coach cho user)
   if (oldUser && updated && updated.coachId && oldUser.coachId !== updated.coachId) {
@@ -38,6 +42,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 // DELETE /api/users/[id]
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  await deleteItem('users', id);
+  const { error } = await supabase.from('users').delete().eq('id', id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
 }

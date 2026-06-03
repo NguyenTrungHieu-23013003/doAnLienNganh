@@ -67,7 +67,7 @@ export default function AdminAIPage() {
         </div>
 
         <Card className="border-zinc-800">
-          <CardHeader title="Per-Student AI Status" subtitle="Generate fresh insights for each student" />
+          <CardHeader title={t("Per-Student AI Status")} subtitle={t("Generate fresh insights for each student")} />
           <CardContent className="p-0">
             <div className="divide-y divide-zinc-900">
               {isLoading ? (
