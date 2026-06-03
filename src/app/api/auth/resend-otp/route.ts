@@ -32,23 +32,23 @@ export async function POST(req: Request) {
       .eq('email', email);
 
     if (updateError) throw updateError;
-    
+
     // Gửi email chứa OTP qua Resend
     if (process.env.RESEND_API_KEY) {
-       const { Resend } = await import('resend');
-       const resend = new Resend(process.env.RESEND_API_KEY);
-       try {
-         await resend.emails.send({
-            from: 'Acme <onboarding@resend.dev>',
-            to: email, // Note: In free tier, only verified domain emails work, but this matches register logic
-            subject: 'FitnessTracker - Mã OTP Xác Thực Mới',
-            html: `<h1>Xin chào ${user.fullName}!</h1><p>Mã xác thực OTP mới của bạn là: <strong>${otp}</strong></p><p>Vui lòng nhập mã này trên web để kích hoạt tài khoản.</p>`
-         });
-       } catch (emailError: unknown) {
-         console.error('Error sending resend OTP email:', emailError);
-       }
+      const { Resend } = await import('resend');
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      try {
+        await resend.emails.send({
+          from: 'Acme <onboarding@resend.dev>',
+          to: email,
+          subject: 'FitnessTracker - Mã OTP Xác Thực Mới',
+          html: `<h1>Xin chào ${user.fullName}!</h1><p>Mã xác thực OTP mới của bạn là: <strong>${otp}</strong></p><p>Vui lòng nhập mã này trên web để kích hoạt tài khoản.</p>`
+        });
+      } catch (emailError: unknown) {
+        console.error('Error sending resend OTP email:', emailError);
+      }
     }
-    
+
     return NextResponse.json({ success: true, message: 'Đã gửi lại OTP thành công.' });
   } catch (err: unknown) {
     if (err instanceof Error) {
