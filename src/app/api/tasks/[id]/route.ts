@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getItem, updateItem, deleteItem, addItem } from '@/lib/mockDb';
+import { addItem } from '@/lib/mockDb';
+import { supabase } from '@/lib/supabase';
 import { Task } from '@/shared/types';
 
 // GET /api/tasks/[id]
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const task = await getItem<Task>('tasks', id);
-  if (!task) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  const { data: task, error } = await supabase.from('tasks').select('*').eq('id', id).single();
+  if (error || !task) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json(task, { headers: { 'Cache-Control': 'no-store' } });
 }
 
@@ -15,7 +16,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { id } = await params;
   const body = await request.json();
 
-  const oldTask = await getItem<Task>('tasks', id);
+  const { data: oldTask } = await supabase.from('tasks').select('*').eq('id', id).single();
   const updates: Partial<Task> = { ...body };
 
   // Auto-set completedAt when status changes to 'done'
@@ -23,8 +24,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     updates.completedAt = new Date().toISOString();
   }
 
-  await updateItem<Task>('tasks', id, updates);
-  const updated = await getItem<Task>('tasks', id);
+  const { data: updated, error: updateError } = await supabase
+    .from('tasks')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 });
 
   if (body.status && oldTask && oldTask.status !== body.status) {
     if (body.status === 'todo') {
@@ -49,10 +56,19 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       });
     }
 
+    // Award XP: coach approves = 'approve', student marks done = 'complete'
     if (body.status === 'done' && oldTask.status === 'review') {
-      fetch(new URL('/api/xp/award', request.url), { method: 'POST', body: JSON.stringify({ userId: updated!.userId, action: 'approve' }) }).catch(console.error);
+      fetch(new URL('/api/xp/award', request.url), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: updated!.userId, action: 'approve' })
+      }).catch(console.error);
     } else if (body.status === 'done') {
-      fetch(new URL('/api/xp/award', request.url), { method: 'POST', body: JSON.stringify({ userId: updated!.userId, action: 'complete' }) }).catch(console.error);
+      fetch(new URL('/api/xp/award', request.url), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: updated!.userId, action: 'complete' })
+      }).catch(console.error);
     }
   }
 
@@ -62,6 +78,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 // DELETE /api/tasks/[id]
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  await deleteItem('tasks', id);
+  const { error } = await supabase.from('tasks').delete().eq('id', id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
 }

@@ -14,11 +14,11 @@ export async function POST(req: Request) {
     let streakAdd = 0;
 
     switch (action) {
-      case 'complete': xpToAdd = 10; streakAdd = 1; break;
-      case 'approve': xpToAdd = 15; break;
-      case 'ontime': xpToAdd = 5; break;
-      case 'metrics': xpToAdd = 5; break;
-      case 'streak': xpToAdd = 50; break;
+      case 'complete': xpToAdd = 2; streakAdd = 1; break;
+      case 'approve': xpToAdd = 2; break;
+      case 'ontime': xpToAdd = 1; break;
+      case 'metrics': xpToAdd = 1; break;
+      case 'streak': xpToAdd = 10; break;
       default: return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
 

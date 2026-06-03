@@ -3,10 +3,22 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Card, CardHeader, CardContent } from './Card';
-import { Trophy, Flame } from 'lucide-react';
+import { Star, Flame } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 type LeaderboardUser = { id: string; name: string; xp: number; streak: number; rank: number };
+
+// 10 XP = 1 Level
+const xpToLevel = (xp: number) => Math.floor(xp / 10);
+const xpInLevel = (xp: number) => xp % 10; // XP dư trong level hiện tại
+const levelLabel = (xp: number) => {
+  const lv = xpToLevel(xp);
+  if (lv === 0) return 'Người Mới';
+  if (lv < 3) return 'Beginner';
+  if (lv < 5) return 'Intermediate';
+  if (lv < 10) return 'Advanced';
+  return 'Elite';
+};
 
 export default function Leaderboard({ isCoachView = false }: { isCoachView?: boolean }) {
   const { t } = useTranslation();
@@ -32,9 +44,9 @@ export default function Leaderboard({ isCoachView = false }: { isCoachView?: boo
 
   return (
     <Card className="border-zinc-800 bg-zinc-950">
-      <CardHeader title={t("Leaderboard")} subtitle={t("Rankings & XP")} />
+      <CardHeader title={t("Leaderboard")} subtitle={t("Rankings & Level")} />
       <CardContent>
-        {/* Toggle Scope Toggle */}
+        {/* Scope Toggle */}
         {!isCoachView && user?.coachId && (
           <div className="flex bg-zinc-900 rounded-lg p-1 mb-4">
             <button
@@ -77,6 +89,9 @@ export default function Leaderboard({ isCoachView = false }: { isCoachView?: boo
 }
 
 function UserRow({ user, isMe }: { user: LeaderboardUser, isMe: boolean }) {
+  const level = xpToLevel(user.xp);
+  const progress = xpInLevel(user.xp); // 0-9 XP trong level hiện tại
+
   return (
     <div className={`flex items-center gap-3 p-3 rounded-xl border ${isMe ? 'bg-blue-900/20 border-blue-500/30' : 'bg-zinc-900/30 border-transparent'} transition-all`}>
       <div className={`w-8 text-center font-black text-lg ${user.rank === 1 ? 'text-amber-400' : user.rank === 2 ? 'text-zinc-300' : user.rank === 3 ? 'text-orange-400' : 'text-zinc-600'}`}>
@@ -86,9 +101,17 @@ function UserRow({ user, isMe }: { user: LeaderboardUser, isMe: boolean }) {
         <p className={`font-semibold text-sm truncate ${isMe ? 'text-blue-50' : 'text-zinc-200'}`}>
           {user.name || 'Anonymous'} {isMe && '(You)'}
         </p>
-        <p className="text-xs text-zinc-500 font-bold flex items-center gap-1">
-          <Trophy className="w-3 h-3 text-amber-500" /> {user.xp} XP
-        </p>
+        <div className="flex items-center gap-2 mt-0.5">
+          <span className="flex items-center gap-1 text-xs font-bold text-amber-400">
+            <Star className="w-3 h-3 fill-amber-400" /> Lv.{level}
+          </span>
+          <span className="text-xs text-zinc-600">{levelLabel(user.xp)}</span>
+          {/* XP progress bar trong level */}
+          <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="h-full bg-amber-500/60 rounded-full" style={{ width: `${(progress / 10) * 100}%` }} />
+          </div>
+          <span className="text-[10px] text-zinc-600">{progress}/10</span>
+        </div>
       </div>
       {user.streak > 0 && (
         <div className="flex items-center gap-1 bg-orange-500/10 text-orange-400 px-2.5 py-1 rounded-full text-xs font-bold">
