@@ -23,7 +23,7 @@ export default function Leaderboard({ isCoachView = false }: { isCoachView?: boo
       url.searchParams.set('scope', scope);
       url.searchParams.set('userId', user.id);
       if (user.coachId) url.searchParams.set('coachId', user.coachId);
-      
+
       const res = await fetch(url.toString());
       setData(await res.json());
     };
@@ -57,7 +57,7 @@ export default function Leaderboard({ isCoachView = false }: { isCoachView?: boo
           {data?.leaderboard.map((u) => (
             <UserRow key={u.id} user={u} isMe={u.id === user?.id} />
           ))}
-          
+
           {data?.currentUserData && !data.leaderboard.find(u => u.id === data.currentUserData!.id) && (
             <>
               <div className="text-center text-xs text-zinc-600 pb-1">...</div>
