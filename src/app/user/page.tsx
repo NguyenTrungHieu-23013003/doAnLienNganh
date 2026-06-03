@@ -11,6 +11,7 @@ import { formatDate } from '@/lib/utils';
 import Link from 'next/link';
 import { useTranslation } from "react-i18next";
 import Leaderboard from '@/shared/components/Leaderboard';
+import BadgeDisplay from '@/shared/components/BadgeDisplay';
 
 export default function UserDashboard() {
   const { t } = useTranslation();
@@ -162,6 +163,7 @@ export default function UserDashboard() {
           </Card>
 
           <Leaderboard />
+          <BadgeDisplay />
         </div>
       </div>
     </DashboardLayout>

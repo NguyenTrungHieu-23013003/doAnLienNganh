@@ -30,6 +30,12 @@ export async function POST(req: Request) {
     });
 
     if (error) throw error;
+
+    fetch(new URL('/api/badges/check', req.url), {
+      method: 'POST',
+      body: JSON.stringify({ userId })
+    }).catch(e => console.error('Badge check failed:', e));
+
     return NextResponse.json({ success: true, ...data[0] });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
