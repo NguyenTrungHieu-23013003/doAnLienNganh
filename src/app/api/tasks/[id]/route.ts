@@ -48,6 +48,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         userId: updated!.coachId, title: 'Báo cáo chấn thương', message: `Học viên bị chấn thương / gặp vấn đề ở bài tập "${updated!.title}"`, isRead: false,
       });
     }
+
+    if (body.status === 'done' && oldTask.status === 'review') {
+      fetch(new URL('/api/xp/award', request.url), { method: 'POST', body: JSON.stringify({ userId: updated!.userId, action: 'approve' }) }).catch(console.error);
+    } else if (body.status === 'done') {
+      fetch(new URL('/api/xp/award', request.url), { method: 'POST', body: JSON.stringify({ userId: updated!.userId, action: 'complete' }) }).catch(console.error);
+    }
   }
 
   return NextResponse.json(updated);

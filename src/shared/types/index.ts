@@ -30,7 +30,8 @@ export interface HealthMetric {
   id: string;
   userId: string;
   weight: number;
-  heartRate: number;
+  height?: number; // Optional since it might just be used for calculations
+  heartRate?: number; // Deprecated or optional
   bodyFatPercentage: number;
   recordedAt: string;
 }

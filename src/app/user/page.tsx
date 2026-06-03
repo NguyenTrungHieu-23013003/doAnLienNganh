@@ -10,6 +10,7 @@ import { Dumbbell, Scale, Activity, Calendar, BrainCircuit, Flame, TrendingDown 
 import { formatDate } from '@/lib/utils';
 import Link from 'next/link';
 import { useTranslation } from "react-i18next";
+import Leaderboard from '@/shared/components/Leaderboard';
 
 export default function UserDashboard() {
   const { t } = useTranslation();
@@ -106,10 +107,9 @@ export default function UserDashboard() {
 
           {/* Health Snapshot */}
           {latest && (
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               {[
                 { label: t('Weight'), value: `${latest.weight} kg`, icon: Scale, color: 'text-blue-400' },
-                { label: t('Heart Rate'), value: `${latest.heartRate} bpm`, icon: Activity, color: 'text-red-400' },
                 { label: t('Body Fat'), value: `${latest.bodyFatPercentage}%`, icon: TrendingDown, color: 'text-amber-400' },
               ].map((s) => (
                 <Card key={s.label} className="border-zinc-800 bg-zinc-950/50">
@@ -160,6 +160,8 @@ export default function UserDashboard() {
                 {t("View all insights →")}</Link>
             </CardContent>
           </Card>
+
+          <Leaderboard />
         </div>
       </div>
     </DashboardLayout>

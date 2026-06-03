@@ -40,7 +40,7 @@ export default function UserMetricsPage() {
   const user = session?.user as { id: string; role: string; fullName: string; name: string | null } | undefined;
   const [metrics, setMetrics] = useState<HealthMetric[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [form, setForm] = useState({ weight: '', heartRate: '', bodyFatPercentage: '' });
+  const [form, setForm] = useState({ weight: '', height: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -61,12 +61,22 @@ export default function UserMetricsPage() {
     e.preventDefault();
     if (!user) return;
     setIsSubmitting(true);
+    
+    let bodyFatPercentage = 0;
+    const w = parseFloat(form.weight);
+    const h = parseFloat(form.height);
+    if (!isNaN(w) && !isNaN(h) && h > 0) {
+      const heightInMeters = h / 100;
+      const bmi = w / (heightInMeters * heightInMeters);
+      bodyFatPercentage = parseFloat(Math.max((1.2 * bmi) - 10.45, 5).toFixed(1)); 
+    }
+
     await fetch('/api/metrics', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id, ...form }),
+      body: JSON.stringify({ userId: user.id, weight: form.weight, bodyFatPercentage }),
     });
     setSuccess(true);
-    setForm({ weight: '', heartRate: '', bodyFatPercentage: '' });
+    setForm({ weight: '', height: '' });
     setTimeout(() => setSuccess(false), 3000);
     fetchMetrics();
     setIsSubmitting(false);
@@ -75,7 +85,6 @@ export default function UserMetricsPage() {
   // Chronological order for charts (oldest first)
   const chronological = [...metrics].reverse();
   const weights = chronological.map((m) => m.weight);
-  const heartRates = chronological.map((m) => m.heartRate);
   const bodyFats = chronological.map((m) => m.bodyFatPercentage);
 
   const latest = metrics[0];
@@ -88,11 +97,6 @@ export default function UserMetricsPage() {
       diff: prev ? (latest.weight - prev.weight).toFixed(1) : null,
     },
     {
-      label: 'Heart Rate', value: `${latest.heartRate} bpm`, prev: prev?.heartRate,
-      values: heartRates, color: '#ef4444', icon: Heart,
-      diff: prev ? (latest.heartRate - prev.heartRate).toString() : null,
-    },
-    {
       label: 'Body Fat', value: `${latest.bodyFatPercentage}%`, prev: prev?.bodyFatPercentage,
       values: bodyFats, color: '#f59e0b', icon: Activity,
       diff: prev ? (latest.bodyFatPercentage - prev.bodyFatPercentage).toFixed(1) : null,
@@ -103,8 +107,8 @@ export default function UserMetricsPage() {
     <DashboardLayout>
       <div className="space-y-8">
         {/* Stat Cards with sparklines */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {isLoading ? Array.from({ length: 3 }).map((_, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {isLoading ? Array.from({ length: 2 }).map((_, i) => (
             <div key={i} className="h-36 rounded-xl bg-zinc-900 border border-zinc-800 animate-pulse" />
           )) : statCards.map((s) => (
             <Card key={s.label} className="border-zinc-800 overflow-hidden">
@@ -139,12 +143,10 @@ export default function UserMetricsPage() {
                   {t("✓ Metrics logged successfully!")}</div>
               )}
               <form onSubmit={handleSubmit} className="space-y-4">
-                <Input id="weight" type="number" step="0.1" label="Weight (kg)" placeholder="e.g. 72.5"
+                <Input id="weight" type="number" step="0.1" label="Cân nặng (kg)" placeholder="Ví dụ: 72.5"
                   value={form.weight} onChange={(e) => setForm((f) => ({ ...f, weight: e.target.value }))} required />
-                <Input id="heartRate" type="number" label="Resting Heart Rate (bpm)" placeholder="e.g. 65"
-                  value={form.heartRate} onChange={(e) => setForm((f) => ({ ...f, heartRate: e.target.value }))} required />
-                <Input id="bodyFat" type="number" step="0.1" label="Body Fat %" placeholder="e.g. 18.5"
-                  value={form.bodyFatPercentage} onChange={(e) => setForm((f) => ({ ...f, bodyFatPercentage: e.target.value }))} />
+                <Input id="height" type="number" step="0.1" label="Chiều cao (cm)" placeholder="Ví dụ: 175"
+                   value={form.height} onChange={(e) => setForm((f) => ({ ...f, height: e.target.value }))} required />
                 <Button type="submit" className="w-full py-5" isLoading={isSubmitting}>{t("Submit Metrics")}</Button>
               </form>
             </CardContent>
@@ -162,7 +164,6 @@ export default function UserMetricsPage() {
                     <tr className="border-b border-zinc-900 text-zinc-500 text-xs font-bold uppercase tracking-wider">
                       <th className="px-6 py-3 text-left">{t("Date")}</th>
                       <th className="px-6 py-3 text-right">{t("Weight")}</th>
-                      <th className="px-6 py-3 text-right">{t("Heart Rate")}</th>
                       <th className="px-6 py-3 text-right">{t("Body Fat")}</th>
                     </tr>
                   </thead>
@@ -176,7 +177,6 @@ export default function UserMetricsPage() {
                           </div>
                         </td>
                         <td className="px-6 py-3.5 text-right font-mono">{m.weight} {t("kg")}</td>
-                        <td className="px-6 py-3.5 text-right font-mono">{m.heartRate} {t("bpm")}</td>
                         <td className="px-6 py-3.5 text-right font-mono">{m.bodyFatPercentage ? `${m.bodyFatPercentage}%` : '—'}</td>
                       </tr>
                     ))}

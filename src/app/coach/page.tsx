@@ -9,6 +9,7 @@ import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Users, ClipboardList, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from "react-i18next";
+import Leaderboard from '@/shared/components/Leaderboard';
 
 export default function CoachDashboard() {
   const { t } = useTranslation();
@@ -134,6 +135,7 @@ export default function CoachDashboard() {
             </CardContent>
           </Card>
         </div>
+        <Leaderboard isCoachView={true} />
       </div>
     </DashboardLayout>
   );
