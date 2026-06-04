@@ -1,17 +1,18 @@
 import { NextResponse } from 'next/server';
-import { readDb, addItem } from '@/lib/mockDb';
-import { Comment } from '@/shared/types';
+import { supabase } from '@/lib/supabase';
 
 // GET /api/comments?taskId=xxx
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const taskId = searchParams.get('taskId');
 
-  let comments = await readDb<Comment>('comments');
-  if (taskId) comments = comments.filter((c) => c.taskId === taskId);
-  comments.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  let query = supabase.from('comments').select('*').order('createdAt', { ascending: true });
+  if (taskId) query = query.eq('taskId', taskId);
 
-  return NextResponse.json(comments, { headers: { 'Cache-Control': 'no-store' } });
+  const { data, error } = await query;
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json(data || [], { headers: { 'Cache-Control': 'no-store' } });
 }
 
 // POST /api/comments
@@ -29,6 +30,8 @@ export async function POST(request: Request) {
     content,
   };
 
-  const created = await addItem('comments', newComment);
-  return NextResponse.json(created ?? newComment, { status: 201 });
+  const { data: created, error } = await supabase.from('comments').insert(newComment).select().single();
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  
+  return NextResponse.json(created, { status: 201 });
 }

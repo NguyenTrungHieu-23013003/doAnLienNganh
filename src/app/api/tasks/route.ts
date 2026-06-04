@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { addItem } from '@/lib/mockDb';
+
 import { supabase } from '@/lib/supabase';
 import { Task } from '@/shared/types';
 
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   // Thông báo User nhận bài tập mới
-  await addItem('notifications', {
+  await supabase.from('notifications').insert({
     userId: newTask.userId!,
     title: 'Bài tập mới',
     message: `Coach vừa giao cho bạn một bài tập mới: ${newTask.title}`,

@@ -1,26 +1,19 @@
 import { NextResponse } from 'next/server';
-import { readDb } from '@/lib/mockDb';
+import { supabase } from '@/lib/supabase';
 
-interface Notification {
-  id: string;
-  userId: string;
-  title: string;
-  message: string;
-  isRead: boolean;
-  createdAt: string;
-}
-
+// GET /api/notifications?userId=xxx
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get('userId');
 
-  let notifications = await readDb<Notification>('notifications');
-
+  let query = supabase.from('notifications').select('*').order('createdAt', { ascending: false });
+  
   if (userId) {
-    notifications = notifications.filter((n) => n.userId === userId);
+    query = query.eq('userId', userId);
   }
 
-  notifications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const { data, error } = await query;
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  return NextResponse.json(notifications, { headers: { 'Cache-Control': 'no-store' } });
+  return NextResponse.json(data || [], { headers: { 'Cache-Control': 'no-store' } });
 }

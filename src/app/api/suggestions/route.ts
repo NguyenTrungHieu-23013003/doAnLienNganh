@@ -1,17 +1,19 @@
 import { NextResponse } from 'next/server';
-import { readDb, addItem } from '@/lib/mockDb';
-import { AISuggestion, HealthMetric } from '@/shared/types';
+import { supabase } from '@/lib/supabase';
+import { HealthMetric } from '@/shared/types';
 
 // GET /api/suggestions?userId=xxx
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get('userId');
 
-  let suggestions = await readDb<AISuggestion>('suggestions');
-  if (userId) suggestions = suggestions.filter((s) => s.userId === userId);
-  suggestions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  let query = supabase.from('suggestions').select('*').order('createdAt', { ascending: false });
+  if (userId) query = query.eq('userId', userId);
 
-  return NextResponse.json(suggestions, { headers: { 'Cache-Control': 'no-store' } });
+  const { data, error } = await query;
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json(data || [], { headers: { 'Cache-Control': 'no-store' } });
 }
 
 // POST /api/suggestions — generate a new AI suggestion (Groq Real API)
@@ -28,14 +30,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'GROQ_API_KEY is not configured' }, { status: 500 });
   }
 
-  // 1. Fetch last 7 metrics entries for the user
-  const allMetrics = await readDb<HealthMetric>('metrics');
-  const userMetrics = allMetrics
-    .filter((m) => m.userId === userId)
-    .sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())
-    .slice(0, 7);
+  // 1. Fetch last 7 metrics entries for the user from Supabase
+  const { data: userMetrics, error: metricsError } = await supabase
+    .from('metrics')
+    .select('*')
+    .eq('userId', userId)
+    .order('recordedAt', { ascending: false })
+    .limit(7);
 
-  if (userMetrics.length === 0) {
+  if (metricsError || !userMetrics || userMetrics.length === 0) {
     return NextResponse.json({ error: 'No health metrics found to analyze.' }, { status: 400 });
   }
 
@@ -68,7 +71,7 @@ export async function POST(request: Request) {
     }
 
     const data = await groqRes.json();
-    suggestionText = data.choices?.[0]?.message?.content || "Keep up the great work!";
+    suggestionText = data.choices?.[0]?.message?.content || "Cố gắng lên, bạn đang làm rất tốt!";
   } catch (error: unknown) {
     console.error("Groq Integration Error:", error);
     return NextResponse.json({ error: 'Failed to generate insight from Groq.' }, { status: 500 });
@@ -76,16 +79,17 @@ export async function POST(request: Request) {
 
   const newSuggestion = {
     userId,
-    taskId: taskId || undefined,
+    taskId: taskId || null,
     suggestion: suggestionText,
-    type: 'insight' as const,
+    type: 'insight',
   };
 
-  // 4. Save Groq response via mockDb
-  const created = await addItem('suggestions', newSuggestion);
+  // 4. Save Groq response via Supabase
+  const { data: created, error: insertError } = await supabase.from('suggestions').insert(newSuggestion).select().single();
+  if (insertError) return NextResponse.json({ error: insertError.message }, { status: 500 });
   
   // Ghi thêm thông báo
-  await addItem('notifications', {
+  await supabase.from('notifications').insert({
     userId,
     title: 'Gợi ý AI Mới',
     message: 'Bạn có một phân tích luyện tập mới từ AI',
@@ -93,5 +97,5 @@ export async function POST(request: Request) {
   });
 
   // 5. Return response to client
-  return NextResponse.json(created ?? newSuggestion, { status: 201 });
+  return NextResponse.json(created, { status: 201 });
 }

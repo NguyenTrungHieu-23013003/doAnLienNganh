@@ -1,41 +1,45 @@
 import { NextResponse } from 'next/server';
-import { readDb, addItem } from '@/lib/mockDb';
-import { HealthMetric } from '@/shared/types';
+import { supabase } from '@/lib/supabase';
+import { awardXp } from '@/lib/xp';
 
 // GET /api/metrics?userId=xxx
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get('userId');
 
-  let metrics = await readDb<HealthMetric>('metrics');
-  if (userId) metrics = metrics.filter((m) => m.userId === userId);
-  metrics.sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime());
+  let query = supabase.from('metrics').select('*').order('recordedAt', { ascending: false });
+  if (userId) query = query.eq('userId', userId);
 
-  return NextResponse.json(metrics, { headers: { 'Cache-Control': 'no-store' } });
+  const { data, error } = await query;
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json(data || [], { headers: { 'Cache-Control': 'no-store' } });
 }
 
 // POST /api/metrics
 export async function POST(request: Request) {
   const body = await request.json();
-  const { userId, weight, height, heartRate = 0, bodyFatPercentage } = body;
+  const { userId, weight, height, bodyFatPercentage } = body;
 
-  if (!userId || weight == null) {
+  if (!userId || weight == null || height == null) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
   const newMetric = {
     userId,
     weight: parseFloat(weight),
-    heartRate: parseInt(heartRate as string) || 0,
+    height: parseFloat(height),
     bodyFatPercentage: parseFloat(bodyFatPercentage) || 0,
   };
 
-  const created = await addItem('metrics', newMetric);
+  const { data: created, error } = await supabase.from('metrics').insert(newMetric).select().single();
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  fetch(new URL('/api/xp/award', request.url), {
-    method: 'POST',
-    body: JSON.stringify({ userId, action: 'metrics' })
-  }).catch(e => console.error('Award XP failed:', e));
+  try {
+    await awardXp(userId, 'metrics');
+  } catch (e) {
+    console.error('Award XP failed:', e);
+  }
 
-  return NextResponse.json(created ?? newMetric, { status: 201 });
+  return NextResponse.json(created, { status: 201 });
 }

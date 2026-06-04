@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { readDb } from '@/lib/mockDb';
-import { HealthMetric, Task } from '@/shared/types';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(request: Request) {
   try {
@@ -16,32 +15,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'GROQ_API_KEY is not configured' }, { status: 500 });
     }
 
-    // Fetch latest user data
-    const allMetrics = await readDb<HealthMetric>('metrics');
-    const allTasks = await readDb<Task>('tasks');
+    // Fetch latest user data from Supabase
+    const { data: userMetrics } = await supabase
+      .from('metrics')
+      .select('*')
+      .eq('userId', userId)
+      .order('recordedAt', { ascending: false })
+      .limit(7);
 
-    const userMetrics = allMetrics
-      .filter((m) => m.userId === userId)
-      .sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())
-      .slice(0, 7);
-
-    const userTasks = allTasks
-      .filter((t) => t.userId === userId && t.status === 'done')
-      .sort((a, b) => {
-        const dateA = a.completedAt || a.createdAt;
-        const dateB = b.completedAt || b.createdAt;
-        return new Date(dateB).getTime() - new Date(dateA).getTime();
-      })
-      .slice(0, 5);
+    const { data: userTasks } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('userId', userId)
+      .eq('status', 'done')
+      .order('completedAt', { ascending: false })
+      .limit(5);
 
     // Build system prompt
     const systemPrompt = `You are a personal fitness coach. Use the user's real health data below to answer. Be specific, friendly, and concise.
     
 User's Recent Health Metrics:
-${JSON.stringify(userMetrics, null, 2)}
+${JSON.stringify(userMetrics || [], null, 2)}
 
 User's Recently Completed Tasks:
-${JSON.stringify(userTasks, null, 2)}
+${JSON.stringify(userTasks || [], null, 2)}
 `;
 
     const messages = [

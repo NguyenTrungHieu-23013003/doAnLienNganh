@@ -8,9 +8,9 @@ import { useTranslation } from 'react-i18next';
 
 type LeaderboardUser = { id: string; name: string; xp: number; streak: number; rank: number };
 
-// 10 XP = 1 Level
-const xpToLevel = (xp: number) => Math.floor(xp / 10);
-const xpInLevel = (xp: number) => xp % 10; // XP dư trong level hiện tại
+// 100 XP = 1 Level
+const xpToLevel = (xp: number) => Math.floor(xp / 100);
+const xpInLevel = (xp: number) => xp % 100; // XP dư trong level hiện tại
 const levelLabel = (xp: number) => {
   const lv = xpToLevel(xp);
   if (lv === 0) return 'Người Mới';
@@ -108,9 +108,9 @@ function UserRow({ user, isMe }: { user: LeaderboardUser, isMe: boolean }) {
           <span className="text-xs text-zinc-600">{levelLabel(user.xp)}</span>
           {/* XP progress bar trong level */}
           <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
-            <div className="h-full bg-amber-500/60 rounded-full" style={{ width: `${(progress / 10) * 100}%` }} />
+            <div className="h-full bg-amber-500/60 rounded-full" style={{ width: `${(progress / 100) * 100}%` }} />
           </div>
-          <span className="text-[10px] text-zinc-600">{progress}/10</span>
+          <span className="text-[10px] text-zinc-600">{progress}/100</span>
         </div>
       </div>
       {user.streak > 0 && (

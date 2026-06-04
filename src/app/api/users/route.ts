@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { addItem } from '@/lib/mockDb';
+
 import { supabase } from '@/lib/supabase';
 import bcrypt from 'bcrypt';
 
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
 
   // Thông báo tới Coach nếu Admin assign ngay khi tạo tài khoản
   if (created?.coachId) {
-    await addItem('notifications', {
+    await supabase.from('notifications').insert({
       userId: created.coachId,
       title: 'Học viên mới',
       message: `Admin đã phân công học viên ${created.fullName} cho bạn huấn luyện`,

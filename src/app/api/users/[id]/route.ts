@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { addItem } from '@/lib/mockDb';
+
 import crypto from 'crypto';
 import { supabase } from '@/lib/supabase';
 
@@ -26,7 +26,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   // Nếu có sự thay đổi coachId (Admin gắn coach cho user)
   if (oldUser && updated && updated.coachId && oldUser.coachId !== updated.coachId) {
-    await addItem('notifications', {
+    await supabase.from('notifications').insert({
       id: `notif-${crypto.randomUUID()}`,
       userId: updated.coachId,
       title: 'Học viên mới',

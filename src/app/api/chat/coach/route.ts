@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { readDb } from '@/lib/mockDb';
-import { HealthMetric, Task } from '@/shared/types';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(request: Request) {
   try {
@@ -16,25 +15,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'GROQ_API_KEY is not configured' }, { status: 500 });
     }
 
-    const allMetrics = await readDb<HealthMetric>('metrics');
-    const allTasks = await readDb<Task>('tasks');
+    const { data: studentMetrics } = await supabase
+      .from('metrics')
+      .select('*')
+      .eq('userId', studentId)
+      .order('recordedAt', { ascending: false })
+      .limit(7);
 
-    const studentMetrics = allMetrics
-      .filter((m) => m.userId === studentId)
-      .sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())
-      .slice(0, 7);
-
-    const studentTasks = allTasks
-      .filter((t) => t.userId === studentId && t.coachId === coachId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const { data: studentTasks } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('userId', studentId)
+      .eq('coachId', coachId)
+      .order('createdAt', { ascending: false })
+      .limit(10);
 
     const systemPrompt = `You are a coaching assistant. Analyze this student's performance data and help the coach make decisions. Be concise and data-driven.
     
 Student's Recent Health Metrics:
-${JSON.stringify(studentMetrics, null, 2)}
+${JSON.stringify(studentMetrics || [], null, 2)}
 
 Student's Tasks:
-${JSON.stringify(studentTasks, null, 2)}
+${JSON.stringify(studentTasks || [], null, 2)}
 `;
 
     const messages = [
