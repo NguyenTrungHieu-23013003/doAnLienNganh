@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { readDb, addItem } from '@/lib/mockDb';
+import { addItem } from '@/lib/mockDb';
+import { supabase } from '@/lib/supabase';
 import { Task } from '@/shared/types';
 
 // GET /api/tasks — list tasks, filtered by userId or coachId
@@ -9,15 +10,15 @@ export async function GET(request: Request) {
   const coachId = searchParams.get('coachId');
   const status = searchParams.get('status');
 
-  let tasks = await readDb<Task>('tasks');
-  if (userId) tasks = tasks.filter((t) => t.userId === userId);
-  if (coachId) tasks = tasks.filter((t) => t.coachId === coachId);
-  if (status) tasks = tasks.filter((t) => t.status === status);
+  let query = supabase.from('tasks').select('*').order('createdAt', { ascending: false });
+  if (userId) query = query.eq('userId', userId);
+  if (coachId) query = query.eq('coachId', coachId);
+  if (status) query = query.eq('status', status);
 
-  // Sort by createdAt descending
-  tasks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const { data, error } = await query;
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  return NextResponse.json(tasks, { headers: { 'Cache-Control': 'no-store' } });
+  return NextResponse.json(data || [], { headers: { 'Cache-Control': 'no-store' } });
 }
 
 // POST /api/tasks — create a task (Coach only)
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
-  const newTask = {
+  const newTask: Partial<Task> = {
     userId,
     coachId,
     title,
@@ -39,15 +40,16 @@ export async function POST(request: Request) {
     dueDate,
   };
 
-  const createdTask = await addItem('tasks', newTask);
-  
+  const { data: created, error } = await supabase.from('tasks').insert(newTask).select().single();
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
   // Thông báo User nhận bài tập mới
   await addItem('notifications', {
-    userId: newTask.userId,
+    userId: newTask.userId!,
     title: 'Bài tập mới',
     message: `Coach vừa giao cho bạn một bài tập mới: ${newTask.title}`,
     isRead: false,
   });
 
-  return NextResponse.json(createdTask ?? newTask, { status: 201 });
+  return NextResponse.json(created, { status: 201 });
 }
