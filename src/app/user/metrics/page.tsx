@@ -71,15 +71,23 @@ export default function UserMetricsPage() {
       bodyFatPercentage = parseFloat(Math.max((1.2 * bmi) - 10.45, 5).toFixed(1)); 
     }
 
-    await fetch('/api/metrics', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id, weight: form.weight, bodyFatPercentage }),
-    });
-    setSuccess(true);
-    setForm({ weight: '', height: '' });
-    setTimeout(() => setSuccess(false), 3000);
-    fetchMetrics();
-    setIsSubmitting(false);
+    try {
+      const resp = await fetch('/api/metrics', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, weight: form.weight, height: form.height, bodyFatPercentage }),
+      });
+      if (!resp.ok) throw new Error('Failed to save metrics');
+      
+      setSuccess(true);
+      setForm({ weight: '', height: '' });
+      setTimeout(() => setSuccess(false), 3000);
+      fetchMetrics();
+    } catch (e) {
+      console.error(e);
+      alert('Đã xảy ra lỗi khi lưu! Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Chronological order for charts (oldest first)
