@@ -15,6 +15,9 @@ export async function GET(request: Request) {
   if (coachId) query = query.eq('coachId', coachId);
   if (status) query = query.eq('status', status);
 
+  // Hide archived tasks
+  query = query.or('isArchived.eq.false,isArchived.is.null');
+
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
