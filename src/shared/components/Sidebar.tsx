@@ -34,7 +34,7 @@ const menuItemsByRole = {
   ],
 };
 
-export const Sidebar = () => {
+export const Sidebar = ({ isOpen = false, onClose = () => {} }: { isOpen?: boolean; onClose?: () => void }) => {
   const { data: session } = useSession();
   const user = session?.user as { name?: string | null, role?: string, fullName?: string } | undefined;
   const logout = () => signOut();
@@ -48,8 +48,21 @@ export const Sidebar = () => {
   const menuItems = menuItemsByRole[user.role as keyof typeof menuItemsByRole] ?? [];
 
   return (
-    <aside className="w-[260px] h-screen fixed left-0 top-0 flex flex-col z-20" style={{ background: 'var(--bg-sidebar)', borderRight: '1px solid var(--border-color)', transition: 'background 0.2s ease' }}>
-      {/* Logo */}
+    <>
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity" 
+          onClick={onClose}
+        />
+      )}
+      <aside 
+        className={cn(
+          "w-[260px] h-screen fixed left-0 top-0 flex flex-col z-50 transition-transform duration-300 md:translate-x-0",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )} 
+        style={{ background: 'var(--bg-sidebar)', borderRight: '1px solid var(--border-color)' }}
+      >
+        {/* Logo */}
       <div className="px-6 pt-6 pb-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-600 rounded-xl shadow-lg shadow-blue-600/20">
@@ -157,6 +170,7 @@ export const Sidebar = () => {
           </div>
         </div>
       </Modal>
-    </aside>
+      </aside>
+    </>
   );
 };
