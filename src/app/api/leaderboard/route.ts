@@ -12,12 +12,11 @@ export async function GET(req: Request) {
     const coachId = searchParams.get('coachId');
     const userId = searchParams.get('userId');
 
-    let baseQuery = supabase.from('users').select('id, name:fullName, xp, streak', { count: 'exact' });
+    let baseQuery = supabase.from('users').select('id, name:fullName, xp, streak', { count: 'exact' })
+      .eq('role', 'user');
     
     if (scope === 'group' && coachId) {
       baseQuery = baseQuery.eq('coachId', coachId);
-    } else {
-      baseQuery = baseQuery.neq('role', 'admin');
     }
 
     const { data: topUsers, error: topError } = await baseQuery
@@ -31,9 +30,12 @@ export async function GET(req: Request) {
     let currentUserData = leaderboard.find(u => u.id === userId) || null;
     
     if (userId && !currentUserData) {
-      const { data: me } = await supabase.from('users').select('id, name:fullName, xp, streak').eq('id', userId).single();
-      if (me) {
-        let rankQuery = supabase.from('users').select('id', { count: 'exact', head: true }).gt('xp', me.xp);
+      const { data: me } = await supabase.from('users').select('id, name:fullName, xp, streak, role').eq('id', userId).single();
+      // Only append current user if they are a standard user
+      if (me && me.role === 'user') {
+        let rankQuery = supabase.from('users').select('id', { count: 'exact', head: true })
+          .eq('role', 'user')
+          .gt('xp', me.xp);
         if (scope === 'group' && coachId) rankQuery = rankQuery.eq('coachId', coachId);
         
         const { count } = await rankQuery;

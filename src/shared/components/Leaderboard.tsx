@@ -33,14 +33,20 @@ export default function Leaderboard({ isCoachView = false }: { isCoachView?: boo
     const fetchLeaderboard = async () => {
       const url = new URL('/api/leaderboard', window.location.origin);
       url.searchParams.set('scope', scope);
-      url.searchParams.set('userId', user.id);
-      if (user.coachId) url.searchParams.set('coachId', user.coachId);
+      
+      // If it's a coach viewing their group, the coachId is their own ID
+      if (isCoachView) {
+        url.searchParams.set('coachId', user.id);
+      } else {
+        url.searchParams.set('userId', user.id);
+        if (user.coachId) url.searchParams.set('coachId', user.coachId);
+      }
 
       const res = await fetch(url.toString());
       setData(await res.json());
     };
     fetchLeaderboard();
-  }, [scope, user]);
+  }, [scope, user, isCoachView]);
 
   return (
     <Card className="border-zinc-800 bg-zinc-950">

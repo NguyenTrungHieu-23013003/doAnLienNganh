@@ -25,8 +25,14 @@ export default function CoachDashboard() {
       fetch(`/api/tasks?coachId=${user.id}`, { cache: 'no-store' }),
       fetch(`/api/users?coachId=${user.id}`, { cache: 'no-store' }),
     ]);
-    setTasks(await tasksRes.json());
-    setStudents(await studentsRes.json());
+    const rawTasks = await tasksRes.json();
+    const activeStudents = await studentsRes.json();
+    
+    // Lọc bỏ task của những tài khoản không còn là học sinh (e.g. đã được thăng thành Coach/Admin)
+    const validTasks = rawTasks.filter((t: Task) => activeStudents.some((s: User) => s.id === t.userId));
+    
+    setTasks(validTasks);
+    setStudents(activeStudents);
     setIsLoading(false);
   }, [user]);
 
