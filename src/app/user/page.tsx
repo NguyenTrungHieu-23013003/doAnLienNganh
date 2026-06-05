@@ -95,7 +95,7 @@ export default function UserDashboard() {
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-sm truncate">{task.title}</p>
                         <p className="text-xs text-zinc-500 flex items-center gap-1 mt-0.5">
-                          <Calendar className="w-3 h-3" /> {t("Due")}{formatDate(task.dueDate)}
+                          <Calendar className="w-3 h-3" /> {t("Due")}: {task.dueDate ? formatDate(task.dueDate) : t("Not Scheduled")}
                         </p>
                       </div>
                       <StatusBadge status={task.status} />
