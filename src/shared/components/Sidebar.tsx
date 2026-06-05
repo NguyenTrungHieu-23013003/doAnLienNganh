@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Users, Dumbbell, Activity,
   LogOut, ChevronRight, BrainCircuit, ClipboardList, Scale,
-  Settings,
+  Settings, UserCheck, CalendarDays
 } from 'lucide-react';
 import { useSettings } from '@/features/settings/SettingsContext';
 import { useTranslation } from 'react-i18next';
@@ -25,11 +25,14 @@ const menuItemsByRole = {
     { name: 'Dashboard', icon: LayoutDashboard, href: '/coach' },
     { name: 'My Students', icon: Users, href: '/coach/students' },
     { name: 'Task Review', icon: ClipboardList, href: '/coach/tasks' },
+    { name: 'Master Schedule', icon: CalendarDays, href: '/coach/calendar' },
   ],
   user: [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/user' },
     { name: 'My Workouts', icon: Dumbbell, href: '/user/tasks' },
+    { name: 'My Schedule', icon: CalendarDays, href: '/user/calendar' },
     { name: 'Health Metrics', icon: Scale, href: '/user/metrics' },
+    { name: 'My Coach', icon: UserCheck, href: '/user/coach' },
     { name: 'AI Insights', icon: BrainCircuit, href: '/user/insights' },
   ],
 };
