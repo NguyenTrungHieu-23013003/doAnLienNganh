@@ -27,32 +27,33 @@ export async function GET(request: Request) {
 // POST /api/tasks — create a task (Coach only)
 export async function POST(request: Request) {
   const body = await request.json();
-  const { userId, coachId, title, type, description, dueDate } = body;
+  const { userId, coachId, title, type, description, frequency = 1 } = body;
 
-  if (!userId || !coachId || !title || !type || !dueDate) {
+  if (!userId || !coachId || !title || !type) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
-  const newTask: Partial<Task> = {
+  // Create multiple tasks based on frequency
+  const tasksToCreate = Array.from({ length: Math.max(1, frequency) }).map(() => ({
     userId,
     coachId,
     title,
     type,
     status: 'todo',
     description: description || '',
-    dueDate,
-  };
+    dueDate: null, // User picks the date later
+  }));
 
-  const { data: created, error } = await supabase.from('tasks').insert(newTask).select().single();
+  const { data: createdTasks, error } = await supabase.from('tasks').insert(tasksToCreate).select();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   // Thông báo User nhận bài tập mới
   await supabase.from('notifications').insert({
-    userId: newTask.userId!,
+    userId: userId,
     title: 'Bài tập mới',
-    message: `Coach vừa giao cho bạn một bài tập mới: ${newTask.title}`,
+    message: `Coach vừa giao cho bạn ${frequency} bài tập: ${title}. Hãy chọn ngày tập!`,
     isRead: false,
   });
 
-  return NextResponse.json(created, { status: 201 });
+  return NextResponse.json(createdTasks, { status: 201 });
 }

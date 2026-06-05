@@ -48,13 +48,14 @@ function relativeTime(dateStr: string): string {
 
 // ── TaskCard sub-component ───────────────────────────────────
 function TaskCard({
-  task, student, isSelected, onClick, hideStudent = false,
+  task, student, isSelected, onClick, hideStudent = false, t
 }: {
   task: Task;
   student: User | undefined;
   isSelected: boolean;
   onClick: () => void;
   hideStudent?: boolean;
+  t: (key: string) => string;
 }) {
   return (
     <button
@@ -89,7 +90,7 @@ function TaskCard({
           </div>
           <div className="flex items-center gap-1 mt-1 text-[10px] text-zinc-600">
             <Calendar className="w-3 h-3" />
-            {formatDate(task.dueDate)}
+            {task.dueDate ? formatDate(task.dueDate) : t('Unscheduled')}
           </div>
         </div>
       </div>
@@ -113,7 +114,7 @@ export default function CoachTasksPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState({
-    userId: '', title: '', type: 'workout' as TaskType, description: '', dueDate: '',
+    userId: '', title: '', type: 'workout' as TaskType, description: '', frequency: 1,
   });
 
   // Task detail panel
@@ -141,8 +142,14 @@ export default function CoachTasksPage() {
       fetch(`/api/tasks?coachId=${user.id}`, { cache: 'no-store' }),
       fetch(`/api/users?coachId=${user.id}`, { cache: 'no-store' }),
     ]);
-    setTasks(await tasksRes.json());
-    setStudents(await studentsRes.json());
+    const rawTasks = await tasksRes.json();
+    const activeStudents = await studentsRes.json();
+
+    // Lọc bỏ task của những tài khoản không còn là học sinh
+    const validTasks = rawTasks.filter((t: Task) => activeStudents.some((s: User) => s.id === t.userId));
+
+    setTasks(validTasks);
+    setStudents(activeStudents);
     setIsLoading(false);
   }, [user]);
 
@@ -230,7 +237,7 @@ export default function CoachTasksPage() {
     });
     setIsSaving(false);
     setIsCreateOpen(false);
-    setForm({ userId: '', title: '', type: 'workout', description: '', dueDate: '' });
+    setForm({ userId: '', title: '', type: 'workout', description: '', frequency: 1 });
     fetchData();
   };
 
@@ -246,6 +253,17 @@ export default function CoachTasksPage() {
 
   // ── Derived ──────────────────────────────────────────────
   const displayed = filterStatus ? tasks.filter((t) => t.status === filterStatus) : tasks;
+
+  // Group tasks by title and createdAt for the flat view
+  const groupedTasks = (() => {
+    const map = new Map<string, Task[]>();
+    for (const t of displayed) {
+      const key = `${t.title}|${t.createdAt.substring(0, 16)}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(t);
+    }
+    return Array.from(map.values());
+  })();
   const reviewCount = tasks.filter((t) => t.status === 'review').length;
   const blockedCount = tasks.filter((t) => t.status === 'blocked').length;
   const studentOptions = [
@@ -256,17 +274,27 @@ export default function CoachTasksPage() {
     ? students.find((s) => s.id === selectedTask.userId)
     : null;
 
-  // Group tasks by student for grouped view
+  // Group tasks by student, and then by title/createdAt for grouped view
   const groupedByStudent = (() => {
-    const map = new Map<string, { student: User | undefined; tasks: Task[] }>();
+    const map = new Map<string, { student: User | undefined; taskGroups: Task[][] }>();
+    
+    // First group by title and createdAt for each student
+    const groupMap = new Map<string, Task[]>();
     for (const task of displayed) {
+      const gkey = `${task.userId}|${task.title}|${task.createdAt.substring(0, 16)}`;
+      if (!groupMap.has(gkey)) groupMap.set(gkey, []);
+      groupMap.get(gkey)!.push(task);
+    }
+
+    for (const group of groupMap.values()) {
+      const task = group[0];
       if (!map.has(task.userId)) {
         map.set(task.userId, {
           student: students.find((s) => s.id === task.userId),
-          tasks: [],
+          taskGroups: [],
         });
       }
-      map.get(task.userId)!.tasks.push(task);
+      map.get(task.userId)!.taskGroups.push(group);
     }
     return Array.from(map.values());
   })();
@@ -356,21 +384,43 @@ export default function CoachTasksPage() {
                 {t('No tasks found.')}
               </div>
             ) : viewMode === 'flat' ? (
-              <div className="space-y-2">
-                {displayed.map((task) => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    student={students.find((s) => s.id === task.userId)}
-                    isSelected={selectedTask?.id === task.id}
-                    onClick={() => openTask(task)}
-                  />
-                ))}
+              <div className="space-y-4">
+                {groupedTasks.map((group, groupIdx) => {
+                  const parentTask = group[0];
+                  const isGroup = group.length > 1;
+
+                  return (
+                    <div key={groupIdx} className={cn("flex flex-col gap-2", isGroup && "p-3 rounded-2xl bg-zinc-900/30 border border-zinc-800/60")}>
+                      {isGroup && (
+                        <div className="flex items-center gap-2 px-1 mb-1">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                            {t('Lộ trình')}: {parentTask.title}
+                          </span>
+                          <span className="ml-auto text-[10px] text-zinc-600 bg-zinc-900 px-2 py-0.5 rounded-full">
+                            {group.filter(t => t.status === 'done').length}/{group.length} {t('Hoàn thành')}
+                          </span>
+                        </div>
+                      )}
+                      <div className="space-y-2">
+                        {group.map((task, idx) => (
+                          <TaskCard
+                            key={task.id}
+                            task={{ ...task, title: isGroup ? `${t('Buổi')} ${idx + 1}` : task.title }}
+                            student={students.find((s) => s.id === task.userId)}
+                            isSelected={selectedTask?.id === task.id}
+                            onClick={() => openTask(task)}
+                            t={t}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               // Grouped by student
               <div className="space-y-4">
-                {groupedByStudent.map(({ student, tasks: sTasks }) => (
+                {groupedByStudent.map(({ student, taskGroups: sTasksGroups }) => (
                   <div key={student?.id ?? 'unknown'}>
                     {/* Student group header */}
                     <div className="flex items-center gap-2 mb-2 px-1">
@@ -378,19 +428,37 @@ export default function CoachTasksPage() {
                         {student?.fullName.charAt(0) ?? '?'}
                       </div>
                       <span className="text-xs font-bold text-zinc-400 truncate">{student?.fullName ?? '—'}</span>
-                      <span className="ml-auto text-[10px] text-zinc-600 font-medium">{sTasks.length} {t('tasks')}</span>
+                      <span className="ml-auto text-[10px] text-zinc-600 font-medium">{sTasksGroups.length} {t('Lộ trình')}</span>
                     </div>
-                    <div className="space-y-1.5 pl-2 border-l border-zinc-800">
-                      {sTasks.map((task) => (
-                        <TaskCard
-                          key={task.id}
-                          task={task}
-                          student={student}
-                          isSelected={selectedTask?.id === task.id}
-                          onClick={() => openTask(task)}
-                          hideStudent
-                        />
-                      ))}
+                    <div className="space-y-4 pl-2 border-l border-zinc-800">
+                      {sTasksGroups.map((group: Task[], groupIdx: number) => {
+                        const parentTask = group[0];
+                        const isGroup = group.length > 1;
+                        return (
+                          <div key={groupIdx} className={cn("flex flex-col gap-2", isGroup && "p-3 rounded-2xl bg-zinc-900/20 border border-zinc-800/40")}>
+                            {isGroup && (
+                              <div className="flex items-center gap-2 px-1 mb-1">
+                                <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                                  {t('Lộ trình')}: {parentTask.title}
+                                </span>
+                              </div>
+                            )}
+                            <div className="space-y-2">
+                              {group.map((task: Task, idx: number) => (
+                                <TaskCard
+                                  key={task.id}
+                                  task={{ ...task, title: isGroup ? `${t('Buổi')} ${idx + 1}` : task.title }}
+                                  student={student}
+                                  isSelected={selectedTask?.id === task.id}
+                                  onClick={() => openTask(task)}
+                                  hideStudent
+                                  t={t}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
@@ -454,7 +522,7 @@ export default function CoachTasksPage() {
                     </span>
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
-                      {t('Due')} {formatDate(selectedTask.dueDate)}
+                      {t('Due')}: {selectedTask.dueDate ? formatDate(selectedTask.dueDate) : t('Not set')}
                     </span>
                     <span className="flex items-center gap-1">
                       <UserCircle2 className="w-3.5 h-3.5" />
@@ -654,11 +722,19 @@ export default function CoachTasksPage() {
             value={form.description}
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
           />
-          <Input
-            id="dueDate" type="date" label={t('Due Date')} value={form.dueDate}
-            onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))}
-            required
-          />
+          {form.type === 'workout' && (
+            <Select
+              id="frequency" label={t('Frequency')} value={form.frequency.toString()}
+              options={[
+                { value: '1', label: t('1 Session (Once)') },
+                { value: '2', label: t('2 Sessions / Week') },
+                { value: '3', label: t('3 Sessions / Week') },
+                { value: '4', label: t('4 Sessions / Week') },
+                { value: '5', label: t('5 Sessions / Week') },
+              ]}
+              onChange={(e) => setForm((f) => ({ ...f, frequency: parseInt(e.target.value) }))}
+            />
+          )}
           <div className="flex gap-3 pt-2">
             <Button type="button" variant="outline" className="flex-1" onClick={() => setIsCreateOpen(false)}>
               {t('Cancel')}

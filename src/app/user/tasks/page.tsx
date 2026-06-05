@@ -39,7 +39,8 @@ function relativeTime(dateStr: string): string {
 
 type Urgency = 'overdue' | 'urgent' | 'soon' | 'normal';
 
-function getDueUrgency(dueDate: string, status: TaskStatus): Urgency {
+function getDueUrgency(dueDate: string | null, status: TaskStatus): Urgency {
+  if (!dueDate) return 'normal';
   if (status === 'done' || status === 'blocked') return 'normal';
   const diffDays = (new Date(dueDate).getTime() - Date.now()) / 86_400_000;
   if (diffDays < 0) return 'overdue';
@@ -164,8 +165,21 @@ export default function UserTasksPage() {
     return [...list].sort((a, b) => {
       const diff = urgencyOrder[getDueUrgency(a.dueDate, a.status)] - urgencyOrder[getDueUrgency(b.dueDate, b.status)];
       if (diff !== 0) return diff;
+      if (!a.dueDate && !b.dueDate) return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      if (!a.dueDate) return -1;
+      if (!b.dueDate) return 1;
       return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
     });
+  })();
+
+  const taskGroups = (() => {
+    const map = new Map<string, Task[]>();
+    for (const t of displayed) {
+      const key = `${t.title}|${t.createdAt.substring(0, 16)}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(t);
+    }
+    return Array.from(map.values());
   })();
 
   return (
@@ -198,50 +212,73 @@ export default function UserTasksPage() {
             <div className="text-center py-20 text-zinc-600 text-sm">{t('No tasks found.')}</div>
           ) : (
             <div className="space-y-3">
-              {displayed.map((task) => {
-                const urgency = getDueUrgency(task.dueDate, task.status);
-                const cfg = urgencyConfig[urgency];
-                const isSelected = selectedTask?.id === task.id;
+              {taskGroups.map((group, groupIdx) => {
+                const parentTask = group[0];
+                const isGroup = group.length > 1;
+
                 return (
-                  <button
-                    key={task.id}
-                    onClick={() => openTask(task)}
-                    className={cn(
-                      'w-full text-left p-4 rounded-xl border transition-all',
-                      isSelected
-                        ? 'border-blue-600/40 bg-blue-600/5'
-                        : urgency !== 'normal'
-                          ? `${cfg.cardBorder} bg-zinc-950/50 hover:border-zinc-700`
-                          : 'border-zinc-800 bg-zinc-950/50 hover:border-zinc-700',
+                  <div key={groupIdx} className={cn("flex flex-col gap-2", isGroup && "p-3 rounded-2xl bg-zinc-900/30 border border-zinc-800/60")}>
+                    {isGroup && (
+                      <div className="flex items-center gap-2 px-1 mb-1">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                          {t('Lộ trình')}: {parentTask.title}
+                        </span>
+                        <span className="ml-auto text-[10px] text-zinc-600 bg-zinc-900 px-2 py-0.5 rounded-full">
+                          {group.filter(t => t.status === 'done').length}/{group.length} {t('Hoàn thành')}
+                        </span>
+                      </div>
                     )}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={cn('p-2 rounded-lg shrink-0 mt-0.5', typeColor[task.type])}>
-                        {typeIcon[task.type]}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm leading-snug mb-1 truncate">{task.title}</p>
-                        <div className="flex items-center justify-between mt-2 gap-2 flex-wrap">
-                          <StatusBadge status={task.status} />
-                          <div className="flex items-center gap-1.5">
-                            {cfg.icon && (
-                              <span className={cn(
-                                'text-[10px] font-bold flex items-center gap-1 px-2 py-0.5 rounded-full border',
-                                cfg.pill,
-                              )}>
-                                <cfg.icon className="w-3 h-3" />
-                                {t(cfg.label)}
-                              </span>
+                    <div className="space-y-2">
+                      {group.map((task, idx) => {
+                        const urgency = getDueUrgency(task.dueDate, task.status);
+                        const cfg = urgencyConfig[urgency];
+                        const isSelected = selectedTask?.id === task.id;
+                        return (
+                          <button
+                            key={task.id}
+                            onClick={() => openTask(task)}
+                            className={cn(
+                              'w-full text-left p-3.5 rounded-xl border transition-all',
+                              isSelected
+                                ? 'border-blue-600/40 bg-blue-600/5'
+                                : urgency !== 'normal'
+                                  ? `${cfg.cardBorder} bg-zinc-950/50 hover:border-zinc-700`
+                                  : 'border-zinc-800 bg-zinc-950/50 hover:border-zinc-700',
                             )}
-                            <span className="text-[10px] text-zinc-600 flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {formatDate(task.dueDate)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className={cn('p-1.5 rounded-lg shrink-0 mt-0.5', typeColor[task.type])}>
+                                {typeIcon[task.type]}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-sm leading-snug mb-1 truncate">
+                                  {isGroup ? `${t('Buổi')} ${idx + 1}` : task.title}
+                                </p>
+                                <div className="flex items-center justify-between mt-2 gap-2 flex-wrap">
+                                  <StatusBadge status={task.status} />
+                                  <div className="flex items-center gap-1.5">
+                                    {cfg.icon && (
+                                      <span className={cn(
+                                        'text-[10px] font-bold flex items-center gap-1 px-2 py-0.5 rounded-full border',
+                                        cfg.pill,
+                                      )}>
+                                        <cfg.icon className="w-3 h-3" />
+                                        {t(cfg.label)}
+                                      </span>
+                                    )}
+                                    <span className="text-[10px] text-zinc-600 flex items-center gap-1">
+                                      <Calendar className="w-3 h-3" />
+                                      {task.dueDate ? formatDate(task.dueDate) : t('Unscheduled (Select Date)')}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -252,7 +289,7 @@ export default function UserTasksPage() {
         <div className="lg:col-span-3">
           {selectedTask ? (
             <Card className="border-zinc-800 flex flex-col" style={{ minHeight: '70vh' }}>
-              <CardHeader title={selectedTask.title} subtitle={`Due ${formatDate(selectedTask.dueDate)}`}>
+              <CardHeader title={selectedTask.title} subtitle={selectedTask.dueDate ? `Due ${formatDate(selectedTask.dueDate)}` : t('Not Scheduled')}>
                 <div className="flex items-center gap-2">
                   {/* Due date badge in header */}
                   {(() => {
@@ -284,7 +321,28 @@ export default function UserTasksPage() {
 
                 {/* User Actions */}
                 <div className="flex flex-wrap gap-3">
-                  {selectedTask.status === 'todo' && (
+                  {selectedTask.status === 'todo' && !selectedTask.dueDate && (
+                    <div className="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-900/20 border border-blue-800/40">
+                      <span className="text-sm font-medium text-blue-300">{t('Hãy chọn ngày tập:')}</span>
+                      <input 
+                        type="date" 
+                        className="bg-zinc-900 border border-zinc-700 text-xs text-white rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500"
+                        onChange={async (e) => {
+                          const newDate = e.target.value;
+                          if (!newDate) return;
+                          await fetch(`/api/tasks/${selectedTask.id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ dueDate: newDate }),
+                          });
+                          fetchTasks();
+                          setSelectedTask((prev) => (prev ? { ...prev, dueDate: newDate } : null));
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {selectedTask.status === 'todo' && selectedTask.dueDate && (
                     <Button size="sm" onClick={() => updateStatus(selectedTask.id, 'in_progress')} className="gap-1.5">
                       <PlayCircle className="w-4 h-4" /> {t('Start Task')}
                     </Button>
