@@ -325,11 +325,15 @@ export default function UserTasksPage() {
                     <div className="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-900/20 border border-blue-800/40">
                       <span className="text-sm font-medium text-blue-300">{t('Hãy chọn ngày tập:')}</span>
                       <input 
-                        type="date" 
+                        type="date"
+                        min={new Date().toISOString().split('T')[0]}
                         className="bg-zinc-900 border border-zinc-700 text-xs text-white rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500"
-                        onChange={async (e) => {
+                        onBlur={async (e) => {
                           const newDate = e.target.value;
                           if (!newDate) return;
+                          // Validate: năm phải >= 2020 và <= 2100 để tránh lưu ngày dở dang
+                          const year = new Date(newDate).getFullYear();
+                          if (year < 2020 || year > 2100) return;
                           await fetch(`/api/tasks/${selectedTask.id}`, {
                             method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
