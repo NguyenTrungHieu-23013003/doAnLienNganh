@@ -46,6 +46,29 @@ function relativeTime(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
+
+/** Parse nội dung comment: tách URL thành <a> có thể click */
+function renderContent(text: string) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  return parts.map((part, i) =>
+    urlRegex.test(part) ? (
+      <a
+        key={i}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline underline-offset-2 opacity-90 hover:opacity-100 break-all"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {part}
+      </a>
+    ) : (
+      <span key={i}>{part}</span>
+    )
+  );
+}
+
 // ── TaskCard sub-component ───────────────────────────────────
 function TaskCard({
   task, student, isSelected, onClick, hideStudent = false, t
@@ -645,12 +668,12 @@ export default function CoachTasksPage() {
                               </div>
                               <div className={cn('flex flex-col gap-1', isMe ? 'items-end' : 'items-start')}>
                                 <div className={cn(
-                                  'max-w-[75%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed',
+                                  'max-w-[75%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap',
                                   isMe
                                     ? 'bg-blue-600 text-white rounded-tr-sm'
                                     : 'bg-zinc-900 text-zinc-200 border border-zinc-800 rounded-tl-sm',
                                 )}>
-                                  {c.content}
+                                  {renderContent(c.content)}
                                 </div>
                                 <span className="text-[10px] text-zinc-600 px-1">
                                   {authorName} · {relativeTime(c.createdAt)}
