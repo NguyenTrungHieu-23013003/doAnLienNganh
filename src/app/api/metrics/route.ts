@@ -25,11 +25,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
+  const parsedWeight = parseFloat(weight);
+  const parsedHeight = parseFloat(height);
+  const parsedBodyFat = parseFloat(bodyFatPercentage);
+
+  if (isNaN(parsedWeight) || parsedWeight <= 0) {
+    return NextResponse.json({ error: 'Cân nặng phải là số dương hợp lệ' }, { status: 400 });
+  }
+  if (isNaN(parsedHeight) || parsedHeight <= 0) {
+    return NextResponse.json({ error: 'Chiều cao phải là số dương hợp lệ' }, { status: 400 });
+  }
+
   const newMetric = {
     userId,
-    weight: parseFloat(weight),
-    height: parseFloat(height),
-    bodyFatPercentage: parseFloat(bodyFatPercentage) || 0,
+    weight: parsedWeight,
+    height: parsedHeight,
+    bodyFatPercentage: isNaN(parsedBodyFat) ? 0 : parsedBodyFat,
   };
 
   const { data: created, error } = await supabase.from('metrics').insert(newMetric).select().single();
