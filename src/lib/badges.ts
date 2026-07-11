@@ -8,7 +8,7 @@ export async function checkAndAwardBadges(userId: string) {
   // 2. Fetch user tasks directly via Supabase
   const { data: tasks } = await supabase.from('tasks').select('*').eq('userId', userId);
   const userTasks = tasks || [];
-  
+
   const doneTasks = userTasks.filter((t: any) => t.status === 'done');
   const earlyTasks = doneTasks.filter((t: any) => t.completedAt && t.dueDate && new Date(t.completedAt) < new Date(t.dueDate));
 
@@ -32,7 +32,7 @@ export async function checkAndAwardBadges(userId: string) {
   if (newTypes.length > 0) {
     const inserts = newTypes.map(type => ({ userId, type }));
     await supabase.from('badges').insert(inserts);
-    
+
     // Add notification for new badges
     for (const type of newTypes) {
       await supabase.from('notifications').insert({
@@ -45,7 +45,7 @@ export async function checkAndAwardBadges(userId: string) {
 
     // Award bonus XP for specific badges
     if (newTypes.includes('streak_7')) {
-      await supabase.from('users').update({ xp: user.xp + 50 }).eq('id', userId);
+      await supabase.rpc('increment_xp', { user_id: userId, amount: 50 });
       await supabase.from('notifications').insert({
         userId,
         title: 'Thưởng chuỗi 7 ngày! 🔥',
