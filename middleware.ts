@@ -16,6 +16,10 @@ function checkRateLimit(ip: string, limit: number, windowMs: number): boolean {
   if (now - lastCleanup > RATE_LIMIT_CLEANUP_INTERVAL) {
     rateLimitMap.clear();
     lastCleanup = now;
+  } else if (rateLimitMap.size > 10000) {
+    // Evict oldest 50% if map grows too large to prevent memory exhaustion attack
+    const keysToDelete = Array.from(rateLimitMap.keys()).slice(0, 5000);
+    for (const key of keysToDelete) rateLimitMap.delete(key);
   }
 
   const record = rateLimitMap.get(ip);
