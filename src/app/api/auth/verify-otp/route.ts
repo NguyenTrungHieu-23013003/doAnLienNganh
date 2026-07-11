@@ -27,13 +27,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Mã OTP không hợp lệ' }, { status: 400 });
     }
 
+    if (user.otp_expires_at && new Date() > new Date(user.otp_expires_at)) {
+      return NextResponse.json({ error: 'Mã OTP đã hết hạn, vui lòng gửi lại mã mới' }, { status: 400 });
+    }
+
     // So sánh OTP trực tiếp (không cần split string nữa)
     if (user.verification_otp !== otp) {
       return NextResponse.json({ error: 'Mã OTP không đúng' }, { status: 400 });
-    }
-
-    if (user.otp_expires_at && new Date() > new Date(user.otp_expires_at)) {
-      return NextResponse.json({ error: 'Mã OTP đã hết hạn, vui lòng gửi lại mã mới' }, { status: 400 });
     }
 
     // Kích hoạt tài khoản, xóa OTP
