@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   const role = searchParams.get('role');
   const coachId = searchParams.get('coachId');
 
-  let query = supabase.from('users').select('*').order('createdAt', { ascending: false });
+  let query = supabase.from('users').select('id, fullName, email, role, coachId, xp, streak, createdAt').order('createdAt', { ascending: false });
   if (role) query = query.eq('role', role);
   if (coachId) query = query.eq('coachId', coachId).eq('role', 'user');
 
