@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Users, Dumbbell, Activity,
   LogOut, ChevronRight, BrainCircuit, ClipboardList, Scale,
-  Settings, UserCheck, CalendarDays
+  Settings, UserCheck, CalendarDays, Database
 } from 'lucide-react';
 import { useSettings } from '@/features/settings/SettingsContext';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +20,7 @@ const menuItemsByRole = {
     { name: 'Dashboard', icon: LayoutDashboard, href: '/admin' },
     { name: 'User Management', icon: Users, href: '/admin/users' },
     { name: 'AI Overview', icon: BrainCircuit, href: '/admin/ai' },
+    { name: 'Dataset Stats', icon: Database, href: '/admin/dataset' },
   ],
   coach: [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/coach' },
@@ -30,6 +31,7 @@ const menuItemsByRole = {
   user: [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/user' },
     { name: 'My Workouts', icon: Dumbbell, href: '/user/tasks' },
+    { name: 'Exercise Library', icon: Database, href: '/user/exercises' },
     { name: 'My Schedule', icon: CalendarDays, href: '/user/calendar' },
     { name: 'Health Metrics', icon: Scale, href: '/user/metrics' },
     { name: 'My Coach', icon: UserCheck, href: '/user/coach' },

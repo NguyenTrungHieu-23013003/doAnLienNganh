@@ -12,10 +12,13 @@ import { useSession } from 'next-auth/react';
 import {
   Plus, Dumbbell, Salad, MessageSquare, CheckCircle2, Ban,
   ChevronRight, Calendar, X, Send, CornerDownLeft, UserCircle2,
-  AlertCircle, Trash2, Users, List,
+  AlertCircle, Trash2, Users, List, Database,
 } from 'lucide-react';
 import { formatDate, cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
+import { ExercisePicker } from '@/shared/components/ExercisePicker';
+import type { Exercise } from '@/lib/exercises';
+
 
 // ── Constants ───────────────────────────────────────────────
 const TYPE_OPTIONS = [
@@ -123,7 +126,7 @@ function TaskCard({
 
 // ── Main Component ────────────────────────────────────────────
 export default function CoachTasksPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: session } = useSession();
   const user = session?.user as { id: string; role: string; fullName: string; name: string | null } | undefined;
 
@@ -136,6 +139,8 @@ export default function CoachTasksPage() {
   // Create task modal
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [createTab, setCreateTab] = useState<'manual' | 'dataset'>('manual');
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [form, setForm] = useState({
     userId: '', title: '', type: 'workout' as TaskType, description: '', frequency: 1,
   });
@@ -258,10 +263,48 @@ export default function CoachTasksPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...form, coachId: user?.id }),
     });
+    // Dispatch custom event to notify NotificationBell component to update instantly
+    window.dispatchEvent(new CustomEvent('refresh-notifications'));
     setIsSaving(false);
     setIsCreateOpen(false);
     setForm({ userId: '', title: '', type: 'workout', description: '', frequency: 1 });
+    setCreateTab('manual');
     fetchData();
+  };
+
+  // Pick exercise from dataset and pre-fill form
+  const handlePickExercise = (exercise: Exercise) => {
+    const isVi = i18n.language?.startsWith('vi');
+    const instructionsText = isVi
+      ? (exercise.instructions?.vi ?? exercise.instructions?.en ?? '')
+      : (exercise.instructions?.en ?? '');
+
+    const descriptionParts = isVi ? [
+      `Phân loại: ${exercise.category}`,
+      `Cơ bắp nhắm tới: ${exercise.target}`,
+      exercise.secondary_muscles?.length ? `Cơ bắp liên quan: ${exercise.secondary_muscles.join(', ')}` : '',
+      `Dụng cụ: ${exercise.equipment}`,
+      '',
+      'Hướng dẫn tập luyện:',
+      instructionsText,
+    ] : [
+      `Category: ${exercise.category}`,
+      `Target: ${exercise.target}`,
+      exercise.secondary_muscles?.length ? `Secondary: ${exercise.secondary_muscles.join(', ')}` : '',
+      `Equipment: ${exercise.equipment}`,
+      '',
+      'Instructions:',
+      instructionsText,
+    ];
+
+    setForm((f) => ({
+      ...f,
+      title: exercise.name,
+      type: 'workout',
+      description: descriptionParts.filter(Boolean).join('\n'),
+    }));
+    setIsPickerOpen(false);
+    setCreateTab('manual');
   };
 
   const handleDelete = async () => {
@@ -719,8 +762,38 @@ export default function CoachTasksPage() {
       </div>
 
       {/* Create Task Modal */}
-      <Modal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title={t('Assign New Task')}>
+      <Modal isOpen={isCreateOpen} onClose={() => { setIsCreateOpen(false); setCreateTab('manual'); }} title={t('Assign New Task')}>
+        {/* Tab switcher */}
+        <div className="flex gap-1 p-1 bg-zinc-900 rounded-lg mb-4">
+          <button
+            onClick={() => setCreateTab('manual')}
+            className={cn('flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-semibold transition-all',
+              createTab === 'manual' ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300')}
+          >
+            <Plus className="w-3.5 h-3.5" /> {t('Manual')}
+          </button>
+          <button
+            onClick={() => setCreateTab('dataset')}
+            className={cn('flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-semibold transition-all',
+              createTab === 'dataset' ? 'bg-blue-600 text-white' : 'text-zinc-500 hover:text-zinc-300')}
+          >
+            <Database className="w-3.5 h-3.5" /> {t('From Dataset')} <span className="ml-1 px-1.5 py-0.5 rounded-full bg-white/10 text-[10px]">1,324</span>
+          </button>
+        </div>
+
+        {createTab === 'dataset' ? (
+          <ExercisePicker onSelect={handlePickExercise} onClose={() => setIsCreateOpen(false)} />
+        ) : (
         <form onSubmit={handleCreate} className="space-y-4">
+          {form.title && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600/10 border border-blue-600/20 text-blue-300 text-xs">
+              <Database className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">{t('Pre-filled from dataset')}: <strong>{form.title}</strong></span>
+              <button type="button" onClick={() => setForm((f) => ({ ...f, title: '', description: '' }))} className="ml-auto text-blue-400 hover:text-white shrink-0">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          )}
           <Select
             id="userId" label={t('Student')} value={form.userId}
             options={studentOptions}
@@ -767,6 +840,7 @@ export default function CoachTasksPage() {
             </Button>
           </div>
         </form>
+        )}
       </Modal>
     </DashboardLayout>
   );
