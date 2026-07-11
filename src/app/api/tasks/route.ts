@@ -34,7 +34,10 @@ export async function POST(request: Request) {
   }
 
   // Create multiple tasks based on frequency
-  const tasksToCreate = Array.from({ length: Math.max(1, frequency) }).map(() => ({
+  // Cap frequency at 30 to prevent DoS/database overflow
+  const safeFreq = Math.min(Math.max(1, parseInt(frequency as string) || 1), 30);
+  
+  const tasksToCreate = Array.from({ length: safeFreq }).map(() => ({
     userId,
     coachId,
     title,
