@@ -35,31 +35,22 @@ export default function NotificationBell({ userId }: { userId: string }) {
   }, [userId]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotifications();
     
-    // 1. Polling: Tự động tải lại mỗi 3 giây để lấy thông báo cross-user (khác tab/ máy)
+    // Polling: Auto refresh every 4 seconds to catch new notifications
     const intervalId = setInterval(() => {
       fetchNotifications();
-    }, 3000);
+    }, 4000);
     
-    // 2. Tự động gọi lại API ngay lập tức khi có thao tác mutation trên cùng tab
-    const originalFetch = window.fetch;
-    window.fetch = async (...args) => {
-      const response = await originalFetch(...args);
-      const requestUrl = (args[0] as string | Request)?.toString() || '';
-      const requestOptions = args[1];
-      const method = (requestOptions?.method || (args[0] as Request)?.method || 'GET').toUpperCase();
-      
-      if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(method) && !requestUrl.includes('/api/notifications')) {
-         fetchNotifications();
-      }
-      return response;
+    // Listen for custom notification triggers within the same tab if any component dispatches it
+    const handleCustomTrigger = () => {
+      fetchNotifications();
     };
+    window.addEventListener('refresh-notifications', handleCustomTrigger);
     
     return () => { 
       clearInterval(intervalId);
-      window.fetch = originalFetch; 
+      window.removeEventListener('refresh-notifications', handleCustomTrigger);
     };
   }, [userId, fetchNotifications]);
 
@@ -116,7 +107,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
                     {!notif.isRead && <span className="w-2 h-2 bg-red-500 rounded-full mt-1 shrink-0 shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>}
                   </div>
                   <p className="text-xs text-zinc-400 mt-1">{notif.message}</p>
-                  <p className="text-[10px] text-zinc-500 mt-2">{formatLocalDate(notif.createdAt)}</p>
+                  <p className="text-[10px] text-zinc-500 mt-2" suppressHydrationWarning>{formatLocalDate(notif.createdAt)}</p>
                 </div>
               ))
             )}
