@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import {
   searchExercises,
   getExercisesByCategory,
@@ -9,21 +10,13 @@ import {
   type SearchFilters,
 } from '@/lib/exercises';
 
-/**
- * GET /api/exercises
- *
- * Query params:
- *   q          - free-text search query
- *   category   - filter by category (e.g. "chest")
- *   equipment  - filter by equipment (e.g. "dumbbell")
- *   body_part  - filter by body part
- *   target     - filter by target muscle
- *   muscle_group - filter by muscle group
- *   limit      - max results (default: 10, max: 50)
- *   stats      - if "true", return dataset statistics
- *   meta       - if "true", return unique filter values
- */
 export async function GET(request: Request) {
+  // [SEC] Kiểm tra xác thực
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { searchParams } = new URL(request.url);
 
   // Return dataset stats
