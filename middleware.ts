@@ -41,7 +41,9 @@ function checkRateLimit(ip: string, limit: number, windowMs: number): boolean {
 
 export default auth((req) => {
   const { nextUrl } = req;
-  const ip = (req as unknown as { ip?: string }).ip || req.headers.get("x-forwarded-for") || "unknown";
+  // [SEC] x-forwarded-for có thể chứa nhiều IPs (proxy chain) — chỉ lấy IP đầu tiên
+  const rawIp = (req as unknown as { ip?: string }).ip || req.headers.get("x-forwarded-for") || "unknown";
+  const ip = rawIp.split(',')[0].trim();
 
   // 1. Chống Spam Đăng Ký (Bảo vệ Token Email) -> Giới hạn: 3 lần / 10 phút
   if (nextUrl.pathname === "/api/auth/register") {
@@ -51,9 +53,23 @@ export default auth((req) => {
   }
 
   // 2. Chống Spam Phân Tích AI (Bảo vệ Groq Token) -> Giới hạn: 5 lần / 1 phút
-  if (nextUrl.pathname === "/api/suggestions") {
+  if (nextUrl.pathname === "/api/suggestions" || nextUrl.pathname === "/api/chat") {
     if (!checkRateLimit(ip + "_ai", 5, 60 * 1000)) {
       return new NextResponse(JSON.stringify({ error: "Rate limit: Gửi yêu cầu AI quá nhanh. Vui lòng nghỉ 1 phút." }), { status: 429, headers: { "Content-Type": "application/json" } });
+    }
+  }
+
+  // 3. Chống Brute-force OTP -> Giới hạn: 5 lần / 5 phút
+  if (nextUrl.pathname === "/api/auth/verify-otp") {
+    if (!checkRateLimit(ip + "_otp", 5, 5 * 60 * 1000)) {
+      return new NextResponse(JSON.stringify({ error: "Quá nhiều lần thử OTP. Vui lòng chờ 5 phút." }), { status: 429, headers: { "Content-Type": "application/json" } });
+    }
+  }
+
+  // 4. Chống Spam Email OTP -> Giới hạn: 3 lần / 10 phút
+  if (nextUrl.pathname === "/api/auth/resend-otp") {
+    if (!checkRateLimit(ip + "_resend", 3, 10 * 60 * 1000)) {
+      return new NextResponse(JSON.stringify({ error: "Gửi lại OTP quá nhiều lần. Vui lòng chờ 10 phút." }), { status: 429, headers: { "Content-Type": "application/json" } });
     }
   }
 
