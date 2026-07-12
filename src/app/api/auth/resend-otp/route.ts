@@ -1,35 +1,40 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import crypto from 'crypto';
 
 export async function POST(req: Request) {
   try {
     const { email } = await req.json();
 
-    if (!email) {
-      return NextResponse.json({ error: 'Email là bắt buộc' }, { status: 400 });
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      return NextResponse.json({ error: 'Email không hợp lệ' }, { status: 400 });
     }
+
+    const normalizedEmail = email.toLowerCase();
 
     const { data: user, error: userError } = await supabase
       .from('users')
       .select('id, fullName, is_verified')
-      .eq('email', email)
+      .eq('email', normalizedEmail)
       .maybeSingle();
 
     if (userError || !user) {
-      return NextResponse.json({ error: 'Tài khoản không tồn tại!' }, { status: 400 });
+      // [SEC] Không tiết lộ email có tồn tại hay không để tránh user enumeration
+      return NextResponse.json({ success: true, message: 'Nếu email hợp lệ, OTP sẽ được gửi.' });
     }
 
     if (user.is_verified) {
       return NextResponse.json({ error: 'Tài khoản đã được xác thực trước đó.' }, { status: 400 });
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000).toISOString(); // Hết hạn sau 2 phút
+    // [SEC] Dùng crypto.randomInt thay vì Math.random (CSPRNG)
+    const otp = crypto.randomInt(100000, 1000000).toString();
+    const otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000).toISOString();
 
     const { error: updateError } = await supabase
       .from('users')
       .update({ verification_otp: otp, otp_expires_at: otpExpiresAt })
-      .eq('email', email);
+      .eq('email', normalizedEmail);
 
     if (updateError) throw updateError;
 
@@ -39,10 +44,10 @@ export async function POST(req: Request) {
       const resend = new Resend(process.env.RESEND_API_KEY);
       try {
         await resend.emails.send({
-          from: 'Acme <onboarding@resend.dev>',
-          to: email,
+          from: 'FitnessTracker <onboarding@resend.dev>',
+          to: normalizedEmail,
           subject: 'FitnessTracker - Mã OTP Xác Thực Mới',
-          html: `<h1>Xin chào ${user.fullName}!</h1><p>Mã xác thực OTP mới của bạn là: <strong>${otp}</strong></p><p>Vui lòng nhập mã này trên web để kích hoạt tài khoản.</p>`
+          html: `<h1>Xin chào ${user.fullName}!</h1><p>Mã xác thực OTP mới của bạn là: <strong>${otp}</strong></p><p>Mã có hiệu lực trong 2 phút. Vui lòng nhập mã này trên web để kích hoạt tài khoản.</p>`
         });
       } catch (emailError: unknown) {
         console.error('Error sending resend OTP email:', emailError);
@@ -51,9 +56,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, message: 'Đã gửi lại OTP thành công.' });
   } catch (err: unknown) {
-    if (err instanceof Error) {
-      return NextResponse.json({ error: err.message }, { status: 500 });
-    }
-    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
+    console.error('[resend-otp]', err);
+    return NextResponse.json({ error: 'Đã xảy ra lỗi, vui lòng thử lại' }, { status: 500 });
   }
 }
