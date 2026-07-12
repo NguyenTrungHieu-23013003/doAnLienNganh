@@ -1,19 +1,47 @@
 import { NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import { supabase } from '@/lib/supabase';
 import { getExerciseContext } from '@/lib/exercises';
 
+// [SEC] Giới hạn kích thước input để tránh tốn Groq token / DoS
+const MAX_MESSAGE_LENGTH = 2000;
+const MAX_HISTORY_ITEMS = 20;
+
 export async function POST(request: Request) {
+  // [SEC] Kiểm tra xác thực
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
-    const { userId, message, history = [] } = body;
+    const { message, history = [] } = body;
 
-    if (!userId || !message) {
-      return NextResponse.json({ error: 'Missing userId or message' }, { status: 400 });
+    // [SEC] userId luôn lấy từ session, không tin vào body
+    const userId = session.user.id;
+
+    if (!message || typeof message !== 'string') {
+      return NextResponse.json({ error: 'Missing message' }, { status: 400 });
+    }
+
+    // [SEC] Validate input size
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json(
+        { error: `Tin nhắn quá dài (tối đa ${MAX_MESSAGE_LENGTH} ký tự)` },
+        { status: 400 }
+      );
+    }
+    if (!Array.isArray(history) || history.length > MAX_HISTORY_ITEMS) {
+      return NextResponse.json(
+        { error: 'Lịch sử chat không hợp lệ hoặc quá dài' },
+        { status: 400 }
+      );
     }
 
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: 'GROQ_API_KEY is not configured' }, { status: 500 });
+      return NextResponse.json({ error: 'AI service chưa được cấu hình' }, { status: 500 });
     }
 
     // Fetch latest user data from Supabase
@@ -52,9 +80,20 @@ INSTRUCTIONS:
 - Keep responses focused and actionable (2-4 sentences)
 - Respond in Vietnamese (Tiếng Việt) unless the user writes in another language`;
 
+    // [SEC] Chỉ nhận history có role hợp lệ để tránh prompt injection
+    const safeHistory = history
+      .filter((m: unknown) => {
+        if (typeof m !== 'object' || m === null) return false;
+        const msg = m as Record<string, unknown>;
+        return (msg.role === 'user' || msg.role === 'assistant') &&
+          typeof msg.content === 'string' &&
+          msg.content.length <= MAX_MESSAGE_LENGTH;
+      })
+      .slice(-MAX_HISTORY_ITEMS);
+
     const messages = [
       { role: 'system', content: systemPrompt },
-      ...history,
+      ...safeHistory,
       { role: 'user', content: message },
     ];
 
@@ -72,8 +111,8 @@ INSTRUCTIONS:
     });
 
     if (!groqRes.ok) {
-      const errorData = await groqRes.text();
-      return NextResponse.json({ error: `Groq API Error: ${errorData}` }, { status: 500 });
+      console.error('Groq API error:', await groqRes.text());
+      return NextResponse.json({ error: 'AI service tạm thời không khả dụng' }, { status: 500 });
     }
 
     const data = await groqRes.json();
@@ -82,6 +121,6 @@ INSTRUCTIONS:
     return NextResponse.json({ reply });
   } catch (error) {
     console.error('Chat API Error:', error);
-    return NextResponse.json({ error: 'Failed to process chat request.' }, { status: 500 });
+    return NextResponse.json({ error: 'Không thể xử lý yêu cầu chat' }, { status: 500 });
   }
 }
